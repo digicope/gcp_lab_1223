@@ -1,6 +1,8 @@
 
 
 ##  2025년 구글클라우드 기반 인공지능 전문가 양성과정 기초반 (2025.12.23~2026.01.28)
+
+K-하이테크 플랫폼:
 ## https://anudp.com/htm/edu_app_view.php?edu_cat=2&edu_no=76&page=1
 <br>
 
