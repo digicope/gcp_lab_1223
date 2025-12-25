@@ -53,4 +53,5 @@ https://gemini.google.com/
 #### [10] Gemini API 사이트 <br>
 https://aistudio.google.com/
 
-
+#### LangChain 1.0 버전 릴리즈 :
+https://docs.langchain.com/oss/python/releases/langchain-v1
