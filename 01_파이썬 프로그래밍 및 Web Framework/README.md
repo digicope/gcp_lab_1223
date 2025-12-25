@@ -44,6 +44,9 @@ https://www.perplexity.ai/
 https://platform.deepseek.com/
 <br>
 
+#### LangChain 1.0 버전 릴리즈 :
+https://docs.langchain.com/oss/python/releases/langchain-v1
+
 #### [9] Gemini 사이트 <br>
 https://gemini.google.com/
 
