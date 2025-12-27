@@ -1,0 +1,233 @@
+[Google Compute Engine에 웹 서버 구현 실습]
+
+[1] Compute Engine에 Nginx 사용 기본 웹서버 올리기
+
+(1) Compute Engine VM 인스턴스 생성 하기
+    인스턴스 이름 : 예시) instance-20251227-075633-kpop-site	
+    인스턴스 머신 구성 : e2-medium(메모리 4GB)
+    OS: Debian Linux 12(bookworm) , 10GB 영구 디스크
+
+    네트워킹에서 방화벽에서 아래 두 개 반드시 체크
+      "HTTP 트래픽 허용"
+      "HTTPS 트래픽 허용"
+    나머지 설정은 기본값으로 그대로 두고 [만들기] 클릭
+
+(2) SSH로 VM과 연결 후 터미널에서 아래 명령 실행
+
+    (Debian Linux 패키지 업데이트 명령 실행)
+    sudo apt update
+    
+    (nginx 설치)
+    sudo apt install -y nginx
+
+    (nginx 실행 상태 확인)
+    sudo systemctl status nginx
+    Ctrl-C를 눌러 빠져 나온다
+
+    VM 인스턴스의 외부 IP(예시:35.184.66.59)를 복사하여 윈도우즈 웹 브라우저에 붙여 넣고
+    웹브라우저에 아래 메시지가 나오면 성공.
+
+        Welcome to nginx!
+        If you see this page, the nginx web server is successfully installed and working. 
+        Further configuration is required.
+
+        For online documentation and support please refer to nginx.org.
+        Commercial support is available at nginx.com.
+
+        Thank you for using nginx.
+
+(3) GCE에 웹 페이지 예제(K-POP 소개 사이트) 올리기 : 파이썬으로 구현하지 않은 일반 웹 서버 소스
+
+    SSH로 VM과 연결후 터미널 우측 상단의 파일 업로드를 클릭하여 파일을 업로드 한다
+    윈도우의 K-POP_Site_Project 폴더에서 index.html을 선택하여 파일 업로드한다
+    다음 style.css 파일도 같은 방법으로  파일 업로드한다
+    (파일이 잘 업로드 되지 않으면 터미널을 종료하고 SSH 연결을 다시해서 업로드를 시도해 본다)
+     
+    터미널에서 ls 명령 실행하여 아래와 같이 나오면 잘 업로드 된것이다.
+      	~$ ls
+	index.html  style.css
+	
+    아래 명령을 실행해서 업로드 된 두 개의 파일을 /var/www/html/ 경로로 복사한다
+	sudo cp index.html /var/www/html/
+	sudo cp style.css /var/www/html/
+
+    VM 인스턴스의 외부 IP(예시:35.184.66.59)를 복사하여 윈도우즈 웹 브라우저에 붙여 넣고
+    웹브라우저에 K-POP 소개 사이트가 잘 나오면 성공.
+    
+    파이썬으로 구현되지 않은 다른 웹 사이트 소스들도 마찬가지로 업로드하여 테스트해 볼수가 있다
+
+----------------------------------------------------------------------------------------------------
+
+[2] Compute Engine에 파이썬 Flask 웹서버 올리기
+
+(1) Compute Engine VM 인스턴스 생성 하기
+    인스턴스 이름 : 예시) instance-20251227-114334-flask-web-server
+    인스턴스 머신 구성 : e2-medium(메모리 4GB)
+    OS: Debian Linux 12(bookworm) , 10GB 영구 디스크
+
+    네트워킹에서 방화벽에서 아래 두 개 반드시 체크
+      "HTTP 트래픽 허용"
+      "HTTPS 트래픽 허용"
+
+    네트워크 태그에 아래와 같이 "web5000"을 추가로 입력한다
+	http-server  https-server  web5000
+
+    나머지 설정은 기본값으로 그대로 두고 [만들기] 클릭
+
+(2) SSH로 VM과 연결후 터미널에서 아래 명령 실행   
+
+    (Debian Linux 패키지 업데이트 명령 실행)
+    sudo apt update
+
+    (Python 및 필수 패키지 설치)
+    sudo apt install -y python3 python3-pip python3-venv
+
+    (서버 프로젝트 디렉터리 생성)
+    mkdir -p ~/flask-app
+    cd ~/flask-app
+
+    (Python 가상환경 생성 및 활성화)
+    python3 -m venv venv
+    source venv/bin/activate
+
+   (활성화 시 프롬프트에 (venv) 표시가 나타난다)
+
+   (Flask 설치)
+   pip install flask
+
+   (Flask 테스트 샘플 애플리케이션 작성)
+   (소스 편집기인 nano 에디터를 실행한다)
+   nano app.py
+
+   (에디터 창에 아래 파이썬 소스를 붙여 넣는다)
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Flask Web Server is running on Debian!"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+
+   (Ctrl-O를 엔터를 치면 수정된 내용이 app.py에 저장된다)
+   (Ctrl-X 로 에디터에서 빠져 나온다)
+
+   (아래 명령으로 Flask서버 파이썬 소스를 실행한다)  
+   python app.py
+
+   (새로운 SSH 연결 창을 실행하고 프롬프트에 아래 명령을 실행한다: 로컬에서 서버 접속 테스트 )	
+   curl -v http://127.0.0.1:5000
+   
+   (로컬에서 연결시 메시지 안에 아래 메시지가 보이면 성공)
+   Flask Web Server is running on Debian!	
+
+   (방화벽 때문에 아직 외부 IP로 접속이 가능하지 않을 것이다)
+
+
+   (***외부 IP접근 허용을 위한 방화벽 규칙 추가하기***)
+
+    GCP 콘솔에서 VPC 네트워크로 들어가서 목록에 이쓴ㄴ "default"를 클릭한다
+
+    default 에서 "방화벽"을 클릭한다
+
+    VPC 방화벽 규칙 옆에 있는 "방화벽 규칙 만들기"를 클릭한다음 아래처럼 입력한다.
+        이름 : allow-flask-5000
+	네트워크 : default
+        트래픽 방향: 인그레스
+        대상 : 지정된 대상 태그
+        대상태그 : web5000
+        소스 필터 : IPv4 ranges
+	소스 IPv4 범위: 0.0.0.0/0
+
+	프로토콜 및 포트 : 지정된 프로토콜 및 포트
+	TCP를 체크해주고 포트: 5000 으로 입력
+
+        나머지 값은 그대로두고 만들기 버튼 클릭.
+
+
+    VM 인스턴스의 외부 IP(예시:34.172.202.114)를 복사하여 윈도우즈 웹 브라우저에 붙여 넣고
+    주소 뒤에 아래와 같이 콜론을 붙이고 포트 번호 5000을 추가하여 엔터를 친다
+    34.172.202.114:5000
+
+    웹브라우저에 Flask Web Server is running on Debian! 메시지가 나오면 성공
+    (잘 안나올경우 Edge나 다른 브라우저를 열어서 입력해본다)
+
+----------------------------------------------------------------------------------------------------
+
+[3] Compute Engine에 Web Chatbot 서버 올리기
+
+(1) SSH로 VM과 연결후 터미널에서 아래 명령 실행   
+
+    (서버 프로젝트 디렉터리 생성)
+    mkdir -p ~/chatbot-app
+    cd ~/chatbot-app
+
+    (Python 가상환경 생성 및 활성화)
+    python3 -m venv venv
+    source venv/bin/activate
+
+   (활성화 시 프롬프트에 (venv) 표시가 나타난다)
+
+   (Flask 설치)
+   pip install flask 
+
+   (OpenAI 와 dotenv 설치)
+   pip install openai python-dotenv
+
+
+(2) Web Chatbot 예제(Web_Chatbot_Project) 올리기 : 파이썬 웹 챗봇 서버 소스
+
+    SSH로 VM과 새로 연결후 터미널 우측 상단의 파일 업로드를 클릭하여 파일을 업로드 한다
+    윈도우의 Web_Chatbot_Project 폴더안에 있는 아래 5개 파일을 모두 업로드한다
+  
+    .env
+    app.py
+    static ------------ script.js, style.css
+    templates ------- index.html
+
+    일단 5개 파일을 같은디렉토리에 5번 따로 모두 업로드 한 후 아래 명령 실행
+
+    cp ~/.env ~/chatbot-app/
+    cp ~/app.py ~/chatbot-app/
+
+    mkdir ~/chatbot-app/static
+    mkdir ~/chatbot-app/templates
+
+    cp ~/script.js ~/chatbot-app/static/
+    cp ~/style.css ~/chatbot-app/static/
+
+    cp ~/index.html ~/chatbot-app/templates/
+
+    모두 전송하였으면 앱을 실행한다
+
+    cd ~/chatbot-app
+    python3 -m venv venv
+    source venv/bin/activate
+
+    (앱실행)
+    python app.py
+
+    VM 인스턴스의 외부 IP(예시:34.172.202.114)를 복사하여 윈도우즈 웹 브라우저에 붙여 넣고
+    주소 뒤에 아래와 같이 콜론을 붙이고 포트 번호 5000을 추가하여 엔터를 친다
+    34.172.202.114:5000
+
+    웹브라우저에 챗봇 창이 나오면 아래 프롬프트르 입력하여 응답이 나오는지 확인해본다
+    "안녕 나는 홍길동이야"  --> "안녕, 홍길동님! 만나서 반가워요. 어떻게 도와드릴까요?"
+
+    만일 질문에 응답이 오지 않으면 .env 파일을 아래 명령으로 열어서 API 키가 올바른지 확인해본다
+    nano ~/chatbot-app/.env
+    
+
+
+
+
+
+    
+
+
+
+    
+
