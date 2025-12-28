@@ -1,0 +1,62 @@
+[Streamlit 기반 웹 챗봇 프로젝트 실습 질의문]
+
+프로젝트 폴더명 : Streamlit_Web_Chatbot
+
+[프롬프트]
+------------------------------------------------------------------------------------
+아래 요구사항을 만족하는 “Streamlit Web Chatbot” 소스 코드를 생성해줘
+
+[목표]
+- Streamlit으로 동작하는 웹 챗봇 UI를 만든다.
+- LLM 호출은 OpenAI API를 사용한다. 모델은 gpt-4o-mini 
+- 대화 히스토리는 st.session_state로 유지한다.
+- 스트리밍 응답(토큰 단위 또는 chunk 단위)을 지원한다.
+- 에러 처리/키 누락 처리/로딩 상태 표시를 넣는다.
+- 코드와 폴더 구조를 깔끔하게 분리한다.
+
+[기술 스택]
+- Python 3.11+
+- streamlit
+- openai (최신 SDK 기준)
+- python-dotenv
+
+[프로젝트 구조]
+- ./app.py                      : Streamlit 엔트리
+- ./requirements.txt
+- ./.env.example              : 필요한 환경변수 템플릿
+- ./src/
+    - llm.py                     : OpenAI 호출/스트리밍 처리 모듈
+    - prompts.py              : 시스템 프롬프트/기본 설정
+    - ui.py                      : 채팅 UI 렌더링 함수
+    - utils.py                   : 공통 유틸(로깅, 예외메시지 포맷 등)
+- ./README.md              : 실행 방법, 환경 변수 설정, 배포 팁
+
+[환경변수]
+- OPENAI_API_KEY 필수
+
+[UI 요구사항]
+- 페이지 제목/아이콘/레이아웃 설정
+- 사이드바에:
+  - 모델 선택(환경변수 기본값을 초기값으로)
+  - temperature 슬라이더(0~1)
+  - “대화 초기화” 버튼
+  - “시스템 프롬프트 보기/수정” textarea (수정하면 세션에 반영)
+- 메인 영역:
+  - 기존 대화 메시지를 role별(assistant/user)로 렌더링
+  - 입력창(st.chat_input)
+  - 전송 시 사용자 메시지 즉시 화면에 반영
+  - 어시스턴트 메시지는 스트리밍으로 점진 표시
+  - 스트리밍 중 취소 버튼이 있으면 좋지만, 없으면 최소한 로딩 인디케이터 표시
+
+[LLM 동작]
+- messages 포맷: system + (user/assistant) 히스토리
+- st.session_state에 다음을 유지:
+  - messages: list[dict] (role, content)
+  - system_prompt: str
+  - model: str
+  - temperature: float
+- 응답은 assistant role로 messages에 append
+- OpenAI 호출 실패 시 사용자에게 친절한 오류 안내(키 누락, rate limit, 네트워크 오류 등 구분)
+- 스트리밍 구현은 Streamlit의 placeholder/empty를 사용
+
+
