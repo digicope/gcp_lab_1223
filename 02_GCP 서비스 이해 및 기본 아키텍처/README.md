@@ -6,7 +6,7 @@
 https://console.cloud.google.com/
 <br>
 
-### [2] Google Skills (구 Skill Boost):
+### [2] Google Skills (구 Skills Boost):
 https://www.skills.google/
 <br>
 
