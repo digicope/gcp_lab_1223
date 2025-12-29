@@ -10,6 +10,6 @@ https://console.cloud.google.com/
 https://www.skills.google/
 <br>
 
-### Google AI Studio:
+### [3] Google AI Studio:
 https://aistudio.google.com/
 <br>
