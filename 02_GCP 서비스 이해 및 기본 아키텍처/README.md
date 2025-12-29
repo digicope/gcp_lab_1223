@@ -2,7 +2,10 @@
 
 <br>
 
+### Google GCP Console:
+https://console.cloud.google.com/
+<br>
+
 ### Google AI Studio:
 https://aistudio.google.com/
-
 <br>
