@@ -10,6 +10,6 @@ https://console.cloud.google.com/
 https://www.skills.google/
 <br>
 
-### [3] Google AI Studio:
+### [3] Google AI Studio (Gemini API 키 발급):
 https://aistudio.google.com/
 <br>
