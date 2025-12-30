@@ -1,6 +1,6 @@
 [Cursor 사용 여행 루트 추천 AI 에이전트 제작 실습 질의문]
 
-프로젝트 폴더명 : AI_Agent_Trip_Project
+프로젝트 폴더명 : AI_Agent_Trip_Project_Gemini
 
 Gemini API와 LangChain v1.0을 활용하여 "AI 여행 루트 추천 + 이미지 해석 + 웹 검색 통합 에이전트" 프로젝트 전체 코드를 생성해줘.
 
@@ -131,3 +131,4 @@ result = agent.invoke({
 
 [추가 질의-2]
 이미지 업로드하여 실행하면 오류나. 수정해줘
+
