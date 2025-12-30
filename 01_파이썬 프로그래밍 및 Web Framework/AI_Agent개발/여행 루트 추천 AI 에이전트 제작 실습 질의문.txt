@@ -2,7 +2,7 @@
 
 프로젝트 폴더명 : AI_Agent_Trip_Project
 
-OpenAI API와 LangChain v1.0을 활용하여 "AI 여행 루트 추천 + 이미지 해석 + 웹 검색 통합 에이전트" 프로젝트 전체 코드를 생성해줘.
+Gemini API와 LangChain v1.0을 활용하여 "AI 여행 루트 추천 + 이미지 해석 + 웹 검색 통합 에이전트" 프로젝트 전체 코드를 생성해줘.
 
 아래 요구사항을 모두 충족하는 완성형 프로젝트를 만들어줘.
 
@@ -45,7 +45,7 @@ OpenAI API와 LangChain v1.0을 활용하여 "AI 여행 루트 추천 + 이미�
 3. 기술 요구사항
 ------------------------------------------------------------
 - Python 파일 기반 프로젝트 구조 생성 (예: main.py, tools/, utils/, rag/, ui/)
-- OpenAI API는 .env 로드 방식 적용
+- Gemini API는 .env 로드 방식 적용
 - 모든 Tool은 @tool 데코레이터로 정의
 - 결과 출력 형식은 JSON 또는 마크다운 형태를 사용
 - Cursor에서 바로 실행 가능한 형태로 구성
@@ -103,7 +103,7 @@ project/
 
 [실행 방법]
 cd ui
-C:\Users\storm\anaconda3\python.exe -m streamlit run app.py
+streamlit run app.py
 
 [입력 방법]
 여행지: 파리
@@ -118,7 +118,7 @@ create_agent() 사용을 아래 소스와 같은 LangChain v1.0 최신 스타일
 from langchain.agents import create_agent
 
 agent = create_agent(
-    model="gpt-4o-mini",
+    model="gemini-2.5-flash",
     tools=[search_web, analyze_data, send_email],
     system_prompt="You are a helpful research assistant."
 )
