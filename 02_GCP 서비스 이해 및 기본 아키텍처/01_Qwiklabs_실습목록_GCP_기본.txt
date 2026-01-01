@@ -11,7 +11,7 @@ https://www.cloudskillsboost.google/focuses/2794?locale=ko&parent=catalog
 
 [2] Creating a Virtual Machine  : (Compute Engine 기초)
 
-https://www.skills.google/focuses/1760?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=65962686
+https://www.cloudskillsboost.google/focuses/3563?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=24944033
 
 gcloud config set compute/region "region=us-central1"
 gcloud config get compute/region
@@ -32,7 +32,7 @@ https://www.cloudskillsboost.google/focuses/563?parent=catalog
 <2nd Day>
 [4] Cloud Storage: Qwik Start - Cloud Console   :  (Cloud Storage 기초)
 
-https://www.cloudskillsboost.google/focuses/1760?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalonvm install --ltsg&search_id=24944290
+https://www.skills.google/focuses/1760?catalog_rank=%7B%22rank%22%3A1%2C%22num_filters%22%3A0%2C%22has_search%22%3Atrue%7D&parent=catalog&search_id=65962686
 
 [주의]
 Grant Access 로 권한 부여하기 전에 상단의 Remove prevent public access를
