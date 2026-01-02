@@ -60,7 +60,7 @@
     gcloud storage buckets create gs://$BUCKET --location=$REGION
 
 
-[3] GCE에서 파이썬 API로 버킷에 접근하기 
+[2] GCE에서 파이썬 API로 버킷에 접근하기 
 
     (1) VM 인스턴스에 SSH로 연결 후 터미널에서 아래 명령 실행한다
 
@@ -186,4 +186,5 @@ print("PDF 바이트 길이:", len(pdf_bytes))
 
 
    
+
 
