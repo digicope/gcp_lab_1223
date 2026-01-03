@@ -8,7 +8,7 @@ https://www.cloudskillsboost.google/course_templates/3
 <1st Day>
 [1] Big Data and Machine Learning on Google Cloud : (Course 01)
    [LAB] : Exploring a BigQuery Public Dataset : (BigQuery 기초)
-
+           https://www.skills.google/course_templates/3/labs/510743
 =================================================================================
 
 >>> [Main Course] : Data Engineering on Google Cloud <<<
@@ -22,7 +22,7 @@ https://www.cloudskillsboost.google/course_templates/54
 
 [2] Introduction to Data Engineering : (Course 02)
    [LAB] :  Using BigQuery to do Analysis : (BigQuery 활용)
-
+   https://www.skills.google/course_templates/54/labs/510904
 
 <2nd Day>
 [3] Building a Data Lake : (Course 02)
