@@ -1,0 +1,309 @@
+[GCE에서 BigQuery 접근하기 실습]
+
+[1] BigQuery 데이터 세트 준비
+Google BigQuery 에서  데이터세트 만들기를 누르고
+데이터세트 ID: shopping_data
+데이터 위치 : US
+선택후 [데이터세트 만들기] 클릭
+
+데이터세트 목록에서 테이블 만들기를 누르고
+Create table from : 업로드
+파일 선택 : shopping_orders.csv
+
+데이터 세트 : shopping_data
+테이블 : shopping_orders
+
+스키마 : 자동감지 를 선택하고 [테이블 만들기] 버튼을 클릭한다
+생성된 테이블을 클릭하고  스키마를 확인하고 미리보기 탭으로 데이터를 확인한다
+
+-------------------------------------------------------------------------------------------
+
+[2] SQL 쿼리하기
+쿼리 제목 탭의 [+]를 클릭하고 아래 소스 입력하여 결과 확인
+
+(1) 총 매출 계산
+(gknu-example-project 부분은 자신의 프로젝트 ID로 수정한다)
+
+SELECT
+  product_name,
+  SUM(quantity * unit_price) AS total_sales
+FROM `gknu-example-project.shopping_data.shopping_orders`
+GROUP BY product_name
+ORDER BY total_sales DESC;
+
+(2) 일자별 주문 건수
+
+SELECT
+  order_date,
+  COUNT(*) AS order_count
+FROM `gknu-example-project.shopping_data.shopping_orders`
+GROUP BY order_date
+ORDER BY order_date;
+
+(3) 고객별 구매 횟수, 총수량, 총구매액, 평균구매액
+
+SELECT
+  customer_name,
+  COUNT(*) AS order_count,
+  SUM(quantity) AS total_qty,
+  SUM(quantity * unit_price) AS total_spent,
+  AVG(quantity * unit_price) AS avg_order_value
+FROM `gknu-example-project.shopping_data.shopping_orders`
+GROUP BY customer_name
+ORDER BY total_spent DESC;
+
+(4) 상품별 구매 고객 수(중복 제거), 주문 수, 총매출
+
+SELECT
+  product_name,
+  COUNT(DISTINCT customer_name) AS unique_customers,
+  COUNT(*) AS order_count,
+  SUM(quantity * unit_price) AS total_sales
+FROM `gknu-example-project.shopping_data.shopping_orders`
+GROUP BY product_name
+ORDER BY total_sales DESC;
+
+(5) 특정 키워드가 들어간 상품만 필터 (LIKE)
+
+SELECT
+  *
+FROM `gknu-example-project.shopping_data.shopping_orders`
+WHERE product_name LIKE '%키보드%'
+ORDER BY order_date, order_id;
+
+-------------------------------------------------------------------------------
+
+[3]  GCE에서 BigQuery 접근하기
+
+(1) Compute Engine 새 VM 인스턴스를 만들어 SSH로 연결 후 터미널에서 아래 명령 실행한다
+(인스턴스 이름 예: instance-20260104-bq-test)
+(주의:    보안 -> 액세스 범위 : "모든 Cloud API에 대한 전체 액세스 허용" 으로 반드시 설정한다)
+
+(Debian Linux 패키지 업데이트 명령 실행)
+sudo apt update
+
+(Python 및 필수 패키지 설치)
+sudo apt install -y python3 python3-pip python3-venv
+
+(앱용 디렉터리 생성)
+mkdir -p ~/bq-app
+cd ~/bq-app
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install google-cloud-bigquery pandas pyarrow
+pip install db-dtypes 
+pip install google-cloud-bigquery-storage "pandas-gbq>=0.26.1"
+
+
+nano bigquery_read_write.py
+
+(아래 내용 복사후 Ctrl-O->Enter->Ctrl-X)
+----------------------------------------------------------
+
+from google.cloud import bigquery
+import pandas as pd
+
+
+PROJECT_ID = "gknu-example-project"  # 자신의 프로젝트 ID로 변경해서 사용한다
+DATASET_ID = "shopping_data"
+
+SOURCE_TABLE = f"{PROJECT_ID}.{DATASET_ID}.shopping_orders"
+TARGET_TABLE = f"{PROJECT_ID}.{DATASET_ID}.shopping_orders_daily_summary"
+
+
+def read_orders(client: bigquery.Client) -> pd.DataFrame:
+    query = f"""
+    SELECT
+      order_date,
+      quantity,
+      unit_price
+    FROM `{SOURCE_TABLE}`
+    """
+    return client.query(query).to_dataframe()
+
+
+def aggregate_daily(df: pd.DataFrame) -> pd.DataFrame:
+    df["line_amount"] = df["quantity"] * df["unit_price"]
+
+    result = (
+        df.groupby("order_date", as_index=False)
+          .agg(
+              order_count=("line_amount", "count"),
+              total_sales=("line_amount", "sum"),
+              avg_order_value=("line_amount", "mean"),
+          )
+    )
+
+    result["order_count"] = result["order_count"].astype("int64")
+    result["total_sales"] = result["total_sales"].astype("int64")
+    result["avg_order_value"] = result["avg_order_value"].round(2)
+
+    return result
+
+
+def ensure_target_table(client: bigquery.Client) -> None:
+    schema = [
+        bigquery.SchemaField("order_date", "DATE"),
+        bigquery.SchemaField("order_count", "INT64"),
+        bigquery.SchemaField("total_sales", "INT64"),
+        bigquery.SchemaField("avg_order_value", "FLOAT64"),
+    ]
+
+    table = bigquery.Table(TARGET_TABLE, schema=schema)
+
+    try:
+        client.get_table(TARGET_TABLE)
+    except Exception:
+        client.create_table(table)
+
+
+def write_to_bigquery(client: bigquery.Client, df: pd.DataFrame) -> None:
+    job_config = bigquery.LoadJobConfig(
+        write_disposition=bigquery.WriteDisposition.WRITE_APPEND
+    )
+
+    load_job = client.load_table_from_dataframe(
+        df,
+        TARGET_TABLE,
+        job_config=job_config,
+    )
+    load_job.result()
+
+
+def main() -> None:
+    client = bigquery.Client(project=PROJECT_ID)
+
+    print("1) BigQuery에서 데이터 읽기")
+    df = read_orders(client)
+    print(f"읽은 행 수: {len(df)}")
+
+    print("2) 일자별 집계")
+    df_daily = aggregate_daily(df)
+    print(df_daily.head())
+
+    print("3) 결과 테이블 확인/생성")
+    ensure_target_table(client)
+
+    print("4) BigQuery로 데이터 쓰기(APPEND)")
+    write_to_bigquery(client, df_daily)
+
+    print("완료: shopping_orders_daily_summary 테이블 적재 성공")
+
+if __name__ == "__main__":
+    main()
+
+----------------------------------------------------------
+
+(앱 실행)
+python bigquery_read_write.py
+
+BigQuery 콘솔에 가서 새로 고침후 새로 생긴 테이블 shopping_orders_daily_summary 을 클릭하고
+미리 보기로 확인한다
+
+---------------------------------------------------------------------------------------------------
+
+[3]  GCE에서 BigQuery 테이블에 데이터 추가 하기
+
+nano bigquery_insert_rows_json.py
+
+(아래 내용 복사후 Ctrl-O->Enter->Ctrl-X)
+----------------------------------------------------------
+
+from google.cloud import bigquery
+
+PROJECT_ID = "gknu-example-project"  # 자신의 프로젝트 ID로 변경해서 사용한다
+
+DATASET_ID = "shopping_data"
+TABLE_ID = "shopping_orders"
+TABLE = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
+
+def main():
+    client = bigquery.Client(project=PROJECT_ID)
+
+    rows = [
+        {
+            "order_id": 2001,
+            "customer_name": "홍길동",
+            "product_name": "무선 키보드",
+            "quantity": 1,
+            "unit_price": 45000,
+            "order_date": "2025-01-18",  # 문자열로 변경
+        },
+        {
+            "order_id": 2002,
+            "customer_name": "김영희",
+            "product_name": "무선 마우스",
+            "quantity": 2,
+            "unit_price": 15000,
+            "order_date": "2025-01-18",  # 문자열로 변경
+        },
+    ]
+
+    errors = client.insert_rows_json(TABLE, rows)
+
+    if errors:
+        print("에러 발생:", errors)
+    else:
+        print("BigQuery 테이블에 데이터 추가 완료")
+
+if __name__ == "__main__":
+    main()
+
+----------------------------------------------------------
+(앱 실행)
+python bigquery_insert_rows_json.py
+
+BigQuery 콘솔에 가서 새로 고침후 shopping_orders 테이블을 클릭하고
+데이터 추가 되었는지 미리 보기로 확인한다. (101~102행 2개가 추가 된다)
+
+----------------------------------------------------------
+
+[4]  GCE에서 BigQuery 테이블에 데이터 삭제 하기
+
+nano bigquery_delete_rows.py
+
+(아래 내용 복사후 Ctrl-O->Enter->Ctrl-X)
+----------------------------------------------------------
+
+from google.cloud import bigquery
+
+PROJECT_ID = "gknu-example-project"
+DATASET = "shopping_data"
+TABLE = "shopping_orders"
+FULL_TABLE = f"{PROJECT_ID}.{DATASET}.{TABLE}"
+
+def main():
+    client = bigquery.Client(project=PROJECT_ID)
+
+    # 기존 테이블 스키마/타입 유지하면서 데이터만 재작성
+    query = f"""
+    CREATE OR REPLACE TABLE `{FULL_TABLE}` AS
+    SELECT *
+    FROM `{FULL_TABLE}`
+    WHERE order_id NOT IN (2001, 2002)
+    """
+
+    job = client.query(query)
+    job.result()
+
+    print("order_id 2001, 2002 제외 후 테이블 재작성 완료")
+
+if __name__ == "__main__":
+    main()
+
+----------------------------------------------------------
+
+(앱 실행)
+python bigquery_delete_rows.py
+
+BigQuery 콘솔에 가서 새로 고침후 shopping_orders 테이블을 클릭하고
+데이터가 삭제 되었는지 미리 보기로 확인한다. (101~102행 2개가 삭제 된다)
+
+
+
+
+
+
+
