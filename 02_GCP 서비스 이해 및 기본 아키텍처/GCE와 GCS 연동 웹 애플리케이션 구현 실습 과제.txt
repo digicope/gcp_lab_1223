@@ -22,6 +22,13 @@ PDF에서 텍스트를 추출한다.
    
    (FastAPI_Project.zip 파일을 업로드한다음 아래 명령 실행)
 
+    (Debian Linux 패키지 업데이트 명령 실행)
+    sudo apt update
+
+    (Python 및 필수 패키지 설치)
+    sudo apt install -y python3 python3-pip python3-venv
+
+
     sudo apt install unzip
     unzip FastAPI_Project.zip -d FastAPI_Project
 
@@ -71,3 +78,4 @@ PDF에서 텍스트를 추출한다.
    VM 인스턴스의 외부 IP(예시:34.59.63.56)를 복사하여 윈도우즈 웹 브라우저에 붙여 넣고
     주소 뒤에 아래와 같이 콜론을 붙이고 포트 번호 8000을 추가하여 엔터를 친다
     http://34.59.63.56:8000
+
