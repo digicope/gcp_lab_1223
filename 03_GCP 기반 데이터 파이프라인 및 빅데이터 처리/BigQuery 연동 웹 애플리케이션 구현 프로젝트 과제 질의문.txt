@@ -1,0 +1,291 @@
+** FastAPI_BigQuery_Gemini_Project_v2
+GCE와 BigQuery 연동 웹 애플리케이션 구현 프로젝트 과제 질의문
+
+[프롬프트-1]
+
+아래 프로젝트 소스 구현해줘
+- 개요
+웹페이지에서 PDF 파일을 업로드하고 Cloud Storage에 저장된 PDF파일을 대상으로
+텍스트 추출과 AI 요약 결과를 BigQuery 테이블에 저장하는 웹 애플리케이션을 구현한다. (Gemini API를 사용해줘. 모델은  gemini-2.5-flash 최신 모델로 사용해줘.  API Key는 .env 파일에 읽어오도록 해줘)
+웹페이지에서 테이블의 내용을 조회할 수 있다
+
+- 기능
+FastAPI가 사용된 웹 페이지에서 PDF 파일을 업로드한다.
+업로드된 PDF 파일은 Google Cloud Storage에 저장된다.
+웹페이지에 저장된 PDF 파일 목록이 표시된다.
+사용자가 “텍스트 추출 및 요약” 버튼을 클릭한다.
+PDF에서 텍스트를 추출한다.
+추출된 텍스트를 Gemini API를 호출하여 요약한다.
+추출 텍스트 파일과 요약 텍스트 파일을 BigQuery 테이블에 저장한다.
+테이블 보기버튼을 누르면 저장된 BigQuery 테이블의 내용이 출력된다
+
+[프롬프트-2]
+BigQuery 접근은 아래 소스와 내용을 참조해서 구현해줘
+[3]  GCE에서 BigQuery 접근하기
+
+(1) Compute Engine 새 VM 인스턴스를 만들어 SSH로 연결 후 터미널에서 아래 명령 실행한다
+(인스턴스 이름 예: instance-20260104-bq-test)
+(주의:    보안 -> 액세스 범위 : "모든 Cloud API에 대한 전체 액세스 허용" 으로 반드시 설정한다)
+
+(Debian Linux 패키지 업데이트 명령 실행)
+sudo apt update
+
+(Python 및 필수 패키지 설치)
+sudo apt install -y python3 python3-pip python3-venv
+
+(앱용 디렉터리 생성)
+mkdir -p ~/bq-app
+cd ~/bq-app
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install google-cloud-bigquery pandas pyarrow
+pip install db-dtypes 
+pip install google-cloud-bigquery-storage "pandas-gbq>=0.26.1"
+
+
+nano bigquery_read_write.py
+
+(아래 내용 복사후 Ctrl-O->Enter->Ctrl-X)
+----------------------------------------------------------
+
+from google.cloud import bigquery
+import pandas as pd
+
+
+PROJECT_ID = "gknu-example-project"  # 자신의 프로젝트 ID로 변경해서 사용한다
+DATASET_ID = "shopping_data"
+
+SOURCE_TABLE = f"{PROJECT_ID}.{DATASET_ID}.shopping_orders"
+TARGET_TABLE = f"{PROJECT_ID}.{DATASET_ID}.shopping_orders_daily_summary"
+
+
+def read_orders(client: bigquery.Client) -> pd.DataFrame:
+    query = f"""
+    SELECT
+      order_date,
+      quantity,
+      unit_price
+    FROM `{SOURCE_TABLE}`
+    """
+    return client.query(query).to_dataframe()
+
+
+def aggregate_daily(df: pd.DataFrame) -> pd.DataFrame:
+    df["line_amount"] = df["quantity"] * df["unit_price"]
+
+    result = (
+        df.groupby("order_date", as_index=False)
+          .agg(
+              order_count=("line_amount", "count"),
+              total_sales=("line_amount", "sum"),
+              avg_order_value=("line_amount", "mean"),
+          )
+    )
+
+    result["order_count"] = result["order_count"].astype("int64")
+    result["total_sales"] = result["total_sales"].astype("int64")
+    result["avg_order_value"] = result["avg_order_value"].round(2)
+
+    return result
+
+
+def ensure_target_table(client: bigquery.Client) -> None:
+    schema = [
+        bigquery.SchemaField("order_date", "DATE"),
+        bigquery.SchemaField("order_count", "INT64"),
+        bigquery.SchemaField("total_sales", "INT64"),
+        bigquery.SchemaField("avg_order_value", "FLOAT64"),
+    ]
+
+    table = bigquery.Table(TARGET_TABLE, schema=schema)
+
+    try:
+        client.get_table(TARGET_TABLE)
+    except Exception:
+        client.create_table(table)
+
+
+def write_to_bigquery(client: bigquery.Client, df: pd.DataFrame) -> None:
+    job_config = bigquery.LoadJobConfig(
+        write_disposition=bigquery.WriteDisposition.WRITE_APPEND
+    )
+
+    load_job = client.load_table_from_dataframe(
+        df,
+        TARGET_TABLE,
+        job_config=job_config,
+    )
+    load_job.result()
+
+
+def main() -> None:
+    client = bigquery.Client(project=PROJECT_ID)
+
+    print("1) BigQuery에서 데이터 읽기")
+    df = read_orders(client)
+    print(f"읽은 행 수: {len(df)}")
+
+    print("2) 일자별 집계")
+    df_daily = aggregate_daily(df)
+    print(df_daily.head())
+
+    print("3) 결과 테이블 확인/생성")
+    ensure_target_table(client)
+
+    print("4) BigQuery로 데이터 쓰기(APPEND)")
+    write_to_bigquery(client, df_daily)
+
+    print("완료: shopping_orders_daily_summary 테이블 적재 성공")
+
+if __name__ == "__main__":
+    main()
+
+----------------------------------------------------------
+
+(앱 실행)
+python bigquery_read_write.py
+
+BigQuery 콘솔에 가서 새로 고침후 새로 생긴 테이블 shopping_orders_daily_summary 을 클릭하고
+미리 보기로 확인한다
+
+---------------------------------------------------------------------------------------------------
+
+[3]  GCE에서 BigQuery 테이블에 데이터 추가 하기
+
+nano bigquery_insert_rows_json.py
+
+(아래 내용 복사후 Ctrl-O->Enter->Ctrl-X)
+----------------------------------------------------------
+
+from google.cloud import bigquery
+
+PROJECT_ID = "gknu-example-project"  # 자신의 프로젝트 ID로 변경해서 사용한다
+
+DATASET_ID = "shopping_data"
+TABLE_ID = "shopping_orders"
+TABLE = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
+
+def main():
+    client = bigquery.Client(project=PROJECT_ID)
+
+    rows = [
+        {
+            "order_id": 2001,
+            "customer_name": "홍길동",
+            "product_name": "무선 키보드",
+            "quantity": 1,
+            "unit_price": 45000,
+            "order_date": "2025-01-18",  # 문자열로 변경
+        },
+        {
+            "order_id": 2002,
+            "customer_name": "김영희",
+            "product_name": "무선 마우스",
+            "quantity": 2,
+            "unit_price": 15000,
+            "order_date": "2025-01-18",  # 문자열로 변경
+        },
+    ]
+
+    errors = client.insert_rows_json(TABLE, rows)
+
+    if errors:
+        print("에러 발생:", errors)
+    else:
+        print("BigQuery 테이블에 데이터 추가 완료")
+
+if __name__ == "__main__":
+    main()
+
+----------------------------------------------------------
+(앱 실행)
+python bigquery_insert_rows_json.py
+
+BigQuery 콘솔에 가서 새로 고침후 shopping_orders 테이블을 클릭하고
+데이터 추가 되었는지 미리 보기로 확인한다. (101~102행 2개가 추가 된다)
+
+----------------------------------------------------------
+
+[4]  GCE에서 BigQuery 테이블에 데이터 삭제 하기
+
+nano bigquery_delete_rows.py
+
+(아래 내용 복사후 Ctrl-O->Enter->Ctrl-X)
+----------------------------------------------------------
+
+from google.cloud import bigquery
+
+PROJECT_ID = "gknu-example-project"
+DATASET = "shopping_data"
+TABLE = "shopping_orders"
+FULL_TABLE = f"{PROJECT_ID}.{DATASET}.{TABLE}"
+
+def main():
+    client = bigquery.Client(project=PROJECT_ID)
+
+    # 기존 테이블 스키마/타입 유지하면서 데이터만 재작성
+    query = f"""
+    CREATE OR REPLACE TABLE `{FULL_TABLE}` AS
+    SELECT *
+    FROM `{FULL_TABLE}`
+    WHERE order_id NOT IN (2001, 2002)
+    """
+
+    job = client.query(query)
+    job.result()
+
+    print("order_id 2001, 2002 제외 후 테이블 재작성 완료")
+
+if __name__ == "__main__":
+    main()
+
+----------------------------------------------------------
+
+(앱 실행)
+python bigquery_delete_rows.py
+
+BigQuery 콘솔에 가서 새로 고침후 shopping_orders 테이블을 클릭하고
+데이터가 삭제 되었는지 미리 보기로 확인한다. (101~102행 2개가 삭제 된다)
+
+[프롬프트-3]
+.env 파일에 환경변수로
+GCP 프로젝트 ID를 gknu-digicope, 
+버킷이름은 mybucket-105186977018 로 설정해주고 
+DATASET은 pdf_processed, 테이블은 summary로 저장해줘
+
+-----------------------------------------------------------------------------
+[앱테스트 방법]
+프로젝트 소스를 압축하여 준비하고( 파일명FastAPI_BigQuery_Gemini_Project_v2)
+VM 에 SSH접속 후 파일을 업로드 한후 아래 명령어 실행
+
+(압축해제)
+sudo apt install unzip
+unzip FastAPI_BigQuery_Gemini_Project_v2 -d FastAPI_Project
+
+(파이썬 설치)
+sudo apt update
+sudo apt install -y python3-full python3-venv
+
+(파이썬 가상환경 설정)
+cd ~/FastAPI_Project
+python3 -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+(앱실행)
+python main.py
+
+ VM 인스턴스의 외부 IP(예시:34.133.218.228)를 복사하여 윈도우즈 웹 브라우저에 붙여 넣고
+    주소 뒤에 아래와 같이 콜론을 붙이고 포트 번호 8000을 추가하여 엔터를 친다
+    http://34.133.218.228:8000
+
+
+
+
+
+
+
+
