@@ -1,4 +1,4 @@
-### 03_GCP ML
+### 04_Google Cloud Platform기반 인공지능 처리
 
 - Vertex AI : 엔드포인트에 모델 배포와 온라인 예측 <br>
 https://cloud.google.com/vertex-ai/docs/general/deployment?hl=ko
