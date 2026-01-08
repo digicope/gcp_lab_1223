@@ -27,7 +27,7 @@ https://www.cloudskillsboost.google/course_templates/54
 <2nd Day>
 [3] Building a Data Lake : (Course 02)
    [LAB] : Loading Taxi Data into Google Cloud SQL 2.5   : (Cloud SQL 기초)
-
+   https://www.skills.google/focuses/27243?parent=catalog
 
 [4] Building a Data Warehouse : (Course 02)
    [LAB] : Loading data into BigQuery     : (BigQuery 활용)
@@ -170,4 +170,5 @@ exit
 
 [17] Advanced BigQuery Functionality and Performance : (Course 04)   --> 실습 생략
    [Lab]: Partitioned Tables in BigQuery : (BigQuery) 
+
 
