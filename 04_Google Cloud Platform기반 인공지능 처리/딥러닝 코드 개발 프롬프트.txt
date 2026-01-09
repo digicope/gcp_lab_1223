@@ -1,0 +1,21 @@
+[딥러닝 코드 개발 프롬프트]
+
+[1] horse_or_human  : 말과 사람 이미지 분류 모델
+    프로젝트 이름 :  Horse_Or_Human_Project
+    아래 URL에서 데이터를 다운받고 압축해제후 프로젝트폴더에 복사해 놓는다  
+    https://www.kaggle.com/datasets/anhkhoango/horse-or-human?select=horses
+
+(프롬프트)
+horses_or_humans 폴더안에 있는 이미지를 사용해서
+말과 사람을 구별하는 딥러닝 분류 모델을 만들어줘
+구글 Tensorflow를 사용해서 소스를 만들어줘.
+모델을 평가하고 평가 결과를 출력하는 코드를 구현해줘.
+
+필요한 파이썬 모듈을 requirements.txt에 넣어 저장해줘
+
+이소스를 기반으로 웹페이지에서 말이나 사람 사진을 업로드하면
+분류하는 앱을 따로 만들어줘. Streamlit을 사용해줘
+
+- 오류 수정: 정답이 사람인데 말만 나와. 수정해줘
+
+    
