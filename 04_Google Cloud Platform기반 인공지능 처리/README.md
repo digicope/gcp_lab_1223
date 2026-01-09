@@ -8,3 +8,9 @@ https://cloud.google.com/vertex-ai/docs/video-data/action-recognition/prepare-da
 
 - Vertex AI : 일괄예측 Python API <br>
 https://cloud.google.com/vertex-ai/docs/predictions/batch-predictions?hl=ko&_ga=2.52828141.-453414775.1691579564#aiplatform_create_batch_prediction_job_video_action_recognition_sample-python
+
+ <br>
+ 
+- 구글 공개 스토리지 데이터 셋
+https://storage.googleapis.com/cloud-training/CBL455/LoanRisk.csv
+https://storage.googleapis.com/car_damage_lab_images/
