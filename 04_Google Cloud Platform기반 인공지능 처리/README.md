@@ -18,6 +18,7 @@ https://storage.googleapis.com/car_damage_lab_images/
 <br>
 
 - Kaggle 이미지 데이터셋<br>
-https://www.kaggle.com/datasets/anhkhoango/horse-or-human
+https://www.kaggle.com/datasets/anhkhoango/horse-or-human <br>
 https://www.kaggle.com/datasets/birajsth/cats-and-dogs-filtered
 
+<br>
