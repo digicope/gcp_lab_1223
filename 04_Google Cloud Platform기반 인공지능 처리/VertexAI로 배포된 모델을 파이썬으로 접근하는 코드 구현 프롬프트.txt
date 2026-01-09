@@ -1,0 +1,29 @@
+[VertexAI로 배포된 모델을 파이썬으로 접근하는 코드 구현]
+프로젝트 이름 : ML_Endpoint_Predict
+
+[프롬프트]
+GCP VertexAI AutoML로 학습한 모델을 엔드포인트로 배포했는데
+아래 내용을 참조하여 이 엔드포인트로 예측하는 파이썬 코드를 만들어줘
+
+ENDPOINT_ID="8065893056550797312"
+PROJECT_ID="105186977018"
+INPUT_DATA_FILE="INPUT-JSON"
+
+curl \
+-X POST \
+-H "Authorization: Bearer $(gcloud auth print-access-token)" \
+-H "Content-Type: application/json" \
+"https://us-central1-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/us-central1/endpoints/${ENDPOINT_ID}:predict" \
+-d "@${INPUT_DATA_FILE}"
+
+- 예측에 사용할 입력 데이터
+{
+  "instances": [
+    {
+      "age": "18.58433593", 
+      "ClientID": "5", 
+      "income": "66952.68885", 
+      "loan": "8770.099235"
+    }
+  ]
+}
