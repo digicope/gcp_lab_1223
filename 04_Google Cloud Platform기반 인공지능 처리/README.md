@@ -14,3 +14,10 @@ https://cloud.google.com/vertex-ai/docs/predictions/batch-predictions?hl=ko&_ga=
 - 구글 공개 스토리지 데이터 셋 <br>
 https://storage.googleapis.com/cloud-training/CBL455/LoanRisk.csv <br>
 https://storage.googleapis.com/car_damage_lab_images/
+
+<br>
+
+- Kaggle 이미지 데이터셋<br>
+https://www.kaggle.com/datasets/anhkhoango/horse-or-human
+https://www.kaggle.com/datasets/birajsth/cats-and-dogs-filtered
+
