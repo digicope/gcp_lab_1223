@@ -1,0 +1,1531 @@
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang='ko'>
+<head>
+<title>Vertex Vizier 하이퍼파라미터 조정 - Vertex AI: 하이퍼파라미터 조정 | Google Skills</title>
+<link crossorigin href='https://cdn.qwiklabs.com' rel='preconnect'>
+<link crossorigin href='https://fonts.gstatic.com' rel='preconnect'>
+<link crossorigin href='https://fonts.googleapis.com' rel='preconnect'>
+<link as='font' crossorigin='anonymous' href='https://cdn.qwiklabs.com/fonts/google-symbols.woff2' rel='preload' type='font/woff2'>
+<link as='font' crossorigin='anonymous' href='https://cdn.qwiklabs.com/fonts/material-icons.woff2' rel='preload' type='font/woff2'>
+<link as='font' crossorigin='anonymous' href='https://cdn.qwiklabs.com/fonts/google-material-icons.woff2' rel='preload' type='font/woff2'>
+<style>
+  @mixin font_face_props {
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+  }
+  
+  @font-face {
+    @include font_face_props;
+  
+    font-family: 'Google Material Icons';
+    src: url('https://cdn.qwiklabs.com/fonts/google-material-icons.woff2') format('woff2');
+  }
+  
+  @font-face {
+    @include font_face_props;
+  
+    font-family: 'Material Icons';
+    src: url('https://cdn.qwiklabs.com/fonts/material-icons.woff2') format('woff2');
+  }
+  
+  @font-face {
+    @include font_face_props;
+  
+    font-family: 'Google Symbols';
+    src: url('https://cdn.qwiklabs.com/fonts/google-symbols.woff2') format('woff2');
+  }
+  
+  .material-icons {
+    font-family: 'Material Icons';
+  }
+  
+  .google-symbols {
+    font-family: 'Google Symbols';
+  }
+  
+  .google-material-icons {
+    font-family: 'Google Material Icons';
+  }
+  
+  .material-icons,
+  .google-symbols,
+  .google-material-icons {
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+</style>
+
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="google-run";
+//]]>
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  const properties = JSON.parse(atob('eyJsb2NhbGUiOiJrbyIsInN1YnNjcmlwdGlvbiI6Im1vbnRobHkiLCJ1c2VyX3JvbGVzIjoic3R1ZGVudCIsImZlYXR1cmVfY2F0YWxvZ19maWx0ZXJfY2hpcHMiOnRydWUsImZlYXR1cmVfZG9jZWJvX3V4Ijp0cnVlLCJmZWF0dXJlX3dpcGVvdXRfaGFyZF9kZWxldGUiOnRydWUsImZlYXR1cmVfaW5fY29udGV4dF9hbGxfbGFicyI6ZmFsc2UsImZlYXR1cmVfZmVlZGJhY2siOnRydWUsImZlYXR1cmVfYmFubmVyX2JyZWFkY3J1bWJzIjp0cnVlLCJmZWF0dXJlX2RvY2Vib19zeW5jIjp0cnVlLCJmZWF0dXJlX3Nob3dfbmV3X2NvdXJzZV9leGFtcyI6dHJ1ZSwiZmVhdHVyZV9jZG5fZm9udHMiOnRydWUsImZlYXR1cmVfZ2FtaWZpY2F0aW9uIjp0cnVlLCJmZWF0dXJlX3NlYXJjaF9zb3J0X2J5Ijp0cnVlLCJmZWF0dXJlX2hpZGVfdW5wb3B1bGFyX2ZpbHRlcnMiOnRydWUsImZlYXR1cmVfZnJvbnRfZG9vcl9sYW5kaW5nX3BhZ2UiOnRydWUsImZlYXR1cmVfaW5ub3ZhdG9yX3NpZ25faW4iOnRydWUsImZlYXR1cmVfc2VhcmNoX2F1dG9jb21wbGV0ZSI6dHJ1ZSwiZmVhdHVyZV9zZWFyY2hfYXN5bmMiOnRydWUsImZlYXR1cmVfaW50ZXJ2aWV3X3dhcm11cF90dXJuZG93biI6dHJ1ZSwiZmVhdHVyZV9pbl9jb250ZXh0X3ZpZXciOmZhbHNlLCJmZWF0dXJlX3N1YnNjcmlwdGlvbl91eCI6dHJ1ZSwiZmVhdHVyZV91c2VfbW9zYWljIjp0cnVlLCJmZWF0dXJlX2FnZV9nYXRlX3Jlc2V0IjpmYWxzZSwiZmVhdHVyZV9jYWNoZV9leHBsb3JlX3BhZ2VfcmVzdWx0Ijp0cnVlLCJmZWF0dXJlX2dhbWlmaWNhdGlvbl9sZWFndWVzIjp0cnVlLCJmZWF0dXJlX3R1cmJvIjpmYWxzZSwiZmVhdHVyZV9jcmVkbHlfbWFuYWdlbWVudCI6ZmFsc2UsImZlYXR1cmVfc3dpdGNoX3BhdGhfYW5kX2V4cGxvcmVfaGVhZGVycyI6dHJ1ZSwiZmVhdHVyZV9jb3Vyc2VfYnVpbGRlciI6ZmFsc2UsImZlYXR1cmVfb25yYW1wIjp0cnVlLCJmZWF0dXJlX2xhYl9leHBhbmRlZF9oaW50Ijp0cnVlLCJmZWF0dXJlX29hdXRoX3Jpc2Nfc2h1dG9mZiI6dHJ1ZSwiZmVhdHVyZV9kYXNoYm9hcmRfam9icyI6dHJ1ZSwiZmVhdHVyZV9nYW1pZmljYXRpb25fdWlfZGF0YSI6dHJ1ZSwiZmVhdHVyZV9nYW1pZmljYXRpb25fYWNoaWV2ZW1lbnRzIjp0cnVlLCJmZWF0dXJlX3JlbGF1bmNoX3N1YnNjcmlwdGlvbnMiOnRydWUsImZlYXR1cmVfcmVsYXVuY2giOnRydWUsImZlYXR1cmVfZGlzY292ZXJ5X2xhYl9kdXJhdGlvbl9lc3RpbWF0ZSI6dHJ1ZSwiZmVhdHVyZV9nYW1pZmljYXRpb25fc3RyZWFrcyI6dHJ1ZSwiZmVhdHVyZV9zc29faW50ZWdyYXRpb25fYWNjZXNzX2FsbG93bGlzdCI6ZmFsc2UsImZlYXR1cmVfZ29vZ2xlX2Rldl9wYXltZW50Ijp0cnVlLCJmZWF0dXJlX2VudGl0eV9hcGlfa2V5cyI6dHJ1ZSwiZmVhdHVyZV9jb3Vyc2VfZXhhbXMiOnRydWUsImZlYXR1cmVfZ2FtaWZpY2F0aW9uX2xlYWRlcmJvYXJkcyI6dHJ1ZSwiZmVhdHVyZV9zaG93X29yZ19jYXRhbG9nX2J1dHRvbiI6ZmFsc2UsImZlYXR1cmVfZ3Vlc3RfdXNlciI6ZmFsc2UsImZlYXR1cmVfc3NvX3JlZGlyZWN0IjpmYWxzZSwiZmVhdHVyZV9jaGFsbGVuZ2VfbGFiX2Zhc3RfdHJhY2siOnRydWUsImZlYXR1cmVfcmVsYXVuY2hfY29sbGVjdGlvbl9haSI6dHJ1ZSwiZmVhdHVyZV9sYW5kaW5nX3BhZ2UiOnRydWUsImZlYXR1cmVfY2F0YWxvZ19maWx0ZXJzX2J1dHRvbiI6dHJ1ZSwiZmVhdHVyZV9vcmdfaW52aXRlX2xpbmsiOnRydWUsImZlYXR1cmVfcmVsYXVuY2hfZW1lcmdlbmN5X2J1dHRvbiI6ZmFsc2UsImZlYXR1cmVfcmVsYXVuY2hfZm9yX3NzbyI6dHJ1ZSwiZmVhdHVyZV9hbGV4YW5kcmlhX3N1YnNjcmlwdGlvbnNfcGFnaW5hdGlvbiI6dHJ1ZSwiZmVhdHVyZV9sYWJfYWlfaGludHMiOmZhbHNlLCJmZWF0dXJlX29uZV90YXAiOnRydWUsImZlYXR1cmVfbmtfcm9sbGJhY2tfdmVyc2lvbiI6ZmFsc2UsImZlYXR1cmVfcmVsYXVuY2hfZXh0cmEiOnRydWUsImZlYXR1cmVfbW9zYWljX3NraWxsc19sYWJfcmVjb21tZW5kYXRpb24iOmZhbHNlLCJmZWF0dXJlX2lsdF9jb250ZW50X3Byb2dyYW0iOmZhbHNlLCJmZWF0dXJlX2dhbWlmaWNhdGlvbl94cCI6dHJ1ZSwiZmVhdHVyZV9nYW1pZmljYXRpb25fdWkiOnRydWUsImZlYXR1cmVfZ3dnX2NhdGFsb2ciOnRydWUsImZlYXR1cmVfY3JlZGx5X2ludGVncmF0aW9uX2Fubm91bmNlbWVudF9tb2RhbCI6dHJ1ZSwiZmVhdHVyZV9yZWxhdW5jaF9jcmVkZW50aWFscyI6ZmFsc2UsImZlYXR1cmVfcmVyb3V0ZV9uZXdfaW50ZXJ2aWV3X3dhcm11cCI6dHJ1ZSwiZmVhdHVyZV9hdXRvX2NvdXJzZV91cGdyYWRlIjpmYWxzZSwiZmVhdHVyZV9nY3Nib19kb21haW5fcmVkaXJlY3QiOmZhbHNlLCJmZWF0dXJlX3NpdGVtYXBfcG9jIjp0cnVlLCJmZWF0dXJlX2Nhbm9uaWNhbF9kb21haW5fcmVkaXJlY3QiOnRydWUsImZlYXR1cmVfc2VhcmNoX3N1Z2dlc3Rpb25zIjp0cnVlLCJmZWF0dXJlX2NyZWRseSI6dHJ1ZSwiZmVhdHVyZV9ub19sdGlfc2Vzc2lvbl9yZWRpcmVjdCI6ZmFsc2UsImZlYXR1cmVfdXNlX2RvY2Vib19mZWF0dXJlcyI6dHJ1ZSwiZmVhdHVyZV9hbGV4YW5kcmlhX3Nob3dfYnVuZGxlX2Vycm9ycyI6ZmFsc2UsImZlYXR1cmVfbGVhcm5pbmdfcGxhbl9zZWFyY2giOnRydWUsImdyb3VwX3N1YWRtaW5zIjpmYWxzZSwiZ3JvdXBfbm9uX3N1YWRtaW5zIjp0cnVlLCJncm91cF9hZG1pbnMiOmZhbHNlLCJncm91cF90cmFpbmVycyI6ZmFsc2UsImdyb3VwX2Nvb3JkaW5hdG9ycyI6ZmFsc2UsImdyb3VwX2NyZWF0b3JzIjpmYWxzZSwiZ3JvdXBfc3R1ZGVudHMiOnRydWUsImdyb3VwX25vbl9vcmdhbml6YXRpb24iOnRydWUsImdyb3VwX29yZ2FuaXphdGlvbl9tZW1iZXJzIjpmYWxzZSwiZ3JvdXBfbm9uX3Byb2dyYW0iOnRydWUsImdyb3VwX2dvb2dsZXJzIjpmYWxzZSwiZ3JvdXBfQ0xTIjpmYWxzZSwiZ3JvdXBfZW5nX3Byb2R1Y3QiOmZhbHNlLCJncm91cF9nYW1pZmljYXRpb25fYmV0YV90ZXN0ZXJzIjpmYWxzZX0='));
+  properties.event = 'user_properties';
+  dataLayer.push(properties);
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    if (arguments[0] === 'event') {
+      dataLayer.push({ event: arguments[1], eventParams: arguments[2] }, { eventParams: undefined });
+    } else {
+      dataLayer.push(arguments);
+    }
+  }
+  let gtmLoaded = false;
+  function glueCookieNotificationBarLoaded() {
+    if (!gtmLoaded) {
+      dataLayerInit(
+        true,
+        false,
+        false,
+        true,
+        'google-run'
+      );
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer',"GTM-MBRHNDG7");
+      pushPageEvent();
+      if (typeof sessEvent !== 'undefined') {
+        pushSessionEvent(sessEvent, sessLoginStatus, sessPreviousPath);
+      }
+      gtmLoaded = true;
+    }
+  }
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-2e147cb1679d97581f981243bfc2d1c03dc34a58.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/head_scripts-78121e337319c81329ed63eb61196ea57f74a57d.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-5ee6eafe71fd3831091397e1aa344044a8642273.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-65e03848c19ebe7d02a32a2425d7b8ce510e6b50.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors__ko-6fbee5444e4c61cf2cdb066d402b33ae26d0291e.js"></script>
+<script src="https://cdn.qwiklabs.com/nk_components/1.1.38/index.js"></script>
+<script src="https://support.google.com/inapp/api.js"></script>
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="Xf_wUtV4cWTdVcJJm1nbdP23tnZM9jZ2mYFRsRDAEi8rVF0XyU8PR1ie1C7S2GWBaOBGifxJrT_PdvKveE7x6Q" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/google_standard_32.svg' property='msapplication-TileImage'>
+<meta content='{&quot;userId&quot;:2331402,&quot;experimentIds&quot;:[&quot;catalog_filter_chips&quot;,&quot;docebo_ux&quot;,&quot;wipeout_hard_delete&quot;,&quot;feedback&quot;,&quot;banner_breadcrumbs&quot;,&quot;docebo_sync&quot;,&quot;show_new_course_exams&quot;,&quot;cdn_fonts&quot;,&quot;gamification&quot;,&quot;search_sort_by&quot;,&quot;hide_unpopular_filters&quot;,&quot;front_door_landing_page&quot;,&quot;innovator_sign_in&quot;,&quot;search_autocomplete&quot;,&quot;search_async&quot;,&quot;interview_warmup_turndown&quot;,&quot;subscription_ux&quot;,&quot;use_mosaic&quot;,&quot;cache_explore_page_result&quot;,&quot;gamification_leagues&quot;,&quot;switch_path_and_explore_headers&quot;,&quot;onramp&quot;,&quot;oauth_risc_shutoff&quot;,&quot;dashboard_jobs&quot;,&quot;gamification_ui_data&quot;,&quot;gamification_achievements&quot;,&quot;relaunch_subscriptions&quot;,&quot;relaunch&quot;,&quot;discovery_lab_duration_estimate&quot;,&quot;gamification_streaks&quot;,&quot;google_dev_payment&quot;,&quot;entity_api_keys&quot;,&quot;course_exams&quot;,&quot;gamification_leaderboards&quot;,&quot;challenge_lab_fast_track&quot;,&quot;relaunch_collection_ai&quot;,&quot;landing_page&quot;,&quot;catalog_filters_button&quot;,&quot;org_invite_link&quot;,&quot;relaunch_for_sso&quot;,&quot;alexandria_subscriptions_pagination&quot;,&quot;one_tap&quot;,&quot;relaunch_extra&quot;,&quot;gamification_xp&quot;,&quot;gamification_ui&quot;,&quot;gwg_catalog&quot;,&quot;credly_integration_announcement_modal&quot;,&quot;reroute_new_interview_warmup&quot;,&quot;sitemap_poc&quot;,&quot;canonical_domain_redirect&quot;,&quot;search_suggestions&quot;,&quot;credly&quot;,&quot;use_docebo_features&quot;,&quot;learning_plan_search&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='이 실습에서는 Vertex AI를 사용하여 TensorFlow 모델을 위한 하이퍼파라미터 조정 작업을 실행합니다.' name='description'>
+<meta content='Google Skills' name='author'>
+<meta content='https://www.skills.google/course_templates/9/labs/495467' property='og:url'>
+<meta content='Vertex Vizier 하이퍼파라미터 조정 - Vertex AI: 하이퍼파라미터 조정 | Google Skills' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/google_standard_32.svg' property='og:image'>
+<meta content='Google Skills' property='og:site_name'>
+<meta content='이 실습에서는 Vertex AI를 사용하여 TensorFlow 모델을 위한 하이퍼파라미터 조정 작업을 실행합니다.' property='og:description'>
+
+
+<link href='https://cdn.qwiklabs.com/X46FrQX4iLxHW5MxL8jICvgZM0evMEKscCeQO%2BazGdo%3D' rel='shortcut icon' type='image/x-icon'>
+<link href='https:///course_templates/9/labs/495467?locale=ko' rel='canonical'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Google+Sans+Text:400,500,700" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-b33cfd6ec0d48faecc064fd1717ac64613a1da58.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #355d9c;
+    --primary-text-on-surface-color-dark: #2f538b;
+    --primary-text-on-surface-color-darker: #29497a;
+    --primary-text-on-surface-color-darkest: #243e69;
+    --primary-surface-color: #586d8d;
+    --primary-surface-color-rgb: 88,109,141;
+    --primary-surface-color-light: #e0e4eb;
+    --primary-surface-color-lightest: #eff2f5;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f000e8;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #000000;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav relaunch course-layout-body l-full no-nav relaunch  learner-layout-body relaunch '>
+<ql-drawer-container class='body-container' relaunch>
+<div class='sticky' slot='header'>
+<ql-toolbar class='app-toolbar' jumpEnabled role='banner'>
+<div class='toolbar-navigation' slot='navigation'>
+<ql-toggle-button animatedToggle class='always-show' for='app-nav' icon='menu' id='menu-toggle' label='메뉴' offIcon='menu' on onIcon='menu_open' tip='메뉴'></ql-toggle-button>
+
+</div>
+<div class='toolbar-title gs-logo' slot='title'>
+<a class="custom-logo" aria-label="Google Skills" href="/?locale=ko"><div class="custom-logo"><img alt="Google Skills" height="24" aria-label="Google Skills" src="https://cdn.qwiklabs.com/lqJbxogu4tSLez1OvjDcIO8rwow6cPLwvrfIdmQLf6U%3D" /></div></a>
+
+</div>
+<div class='search-bar tablet-hide' slot='search'><div class='search-bar-container visible-search-header'>
+<form class="header-search-form" action="/catalog?locale=ko" accept-charset="UTF-8" method="get">
+<input aria-autocomplete='list' aria-controls='searchbar-autocomplete-menu-center' aria-expanded='false' autocomplete='off' class='header-search-input' id='searchbar-autocomplete-center' name='keywords' placeholder='오늘은 무엇을 학습하고 싶으신가요?' role='combobox'>
+<div class='elevation-3' id='searchbar-autocomplete-loading-icon-center'>
+<ql-spinner></ql-spinner>
+<div class='ql-body-small'>로드 중...</div>
+</div>
+<div class='elevation-3' id='searchbar-autocomplete-no-results-center'>
+<div class='ql-body-small'>검색 결과가 없습니다.</div>
+</div>
+<ul aria-hidden='true' aria-live='polite' class='hide' id='searchbar-autocomplete-menu-center' role='listbox'></ul>
+<ql-icon-button class='search-bar-button search-button' icon='search' label='검색' type='submit'></ql-icon-button>
+</form>
+
+<ql-icon-button class='exit-search-button show-tablet' icon='close' inert label='검색 종료'></ql-icon-button>
+</div>
+</div>
+<div class='toolbar-actions' slot='action'>
+<ql-icon-button icon='share' id='share_4414' label='소셜 미디어 공유' tip='공유'></ql-icon-button>
+<ql-menu class='social-share-menu' for='share_4414'>
+<ql-menu-item data-analytics-action='Shared to LinkedIn Feed.' data-analytics-category='Lab' data-analytics-label='Vertex AI: Hyperparameter Tuning' href='https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fwww.skills.google%2Fcatalog_lab%2F4414%3Flocale%3Dko%26utm_medium%3Dsocial%26utm_source%3Dlinkedin%26utm_campaign%3Dql-social-share' iconSrc='https://www.gstatic.com/images/icons/material/system/2x/post_linkedin_black_24dp.png' label='LinkedIn 피드에서 공유' role='link' target='_blank'>
+<span class='label'>LinkedIn 피드에서 공유</span>
+</ql-menu-item>
+
+<ql-menu-item data-analytics-action='Shared to Twitter.' data-analytics-category='Lab' data-analytics-label='Vertex AI: Hyperparameter Tuning' href='https://twitter.com/intent/tweet?text=%23GoogleSkills%EC%97%90%EC%84%9C%20%EC%8B%A4%EC%8A%B5%20%EA%B5%90%EC%9C%A1%EC%9D%84%20%ED%86%B5%ED%95%B4%20%ED%81%B4%EB%9D%BC%EC%9A%B0%EB%93%9C%20%EA%B8%B0%EC%88%A0%EC%9D%84%20%EB%B0%B0%EC%9B%8C%EB%B3%B4%EC%84%B8%EC%9A%94.&amp;url=https%3A%2F%2Fwww.skills.google%2Fcatalog_lab%2F4414%3Flocale%3Dko%26utm_medium%3Dsocial%26utm_source%3Dtwitter%26utm_campaign%3Dql-social-share&amp;hashtags=' iconSrc='https://www.gstatic.com/images/icons/material/system/2x/post_twitter_black_24dp.png' label='Twitter' role='link' target='_blank'>
+<span class='label'>Twitter</span>
+</ql-menu-item>
+
+<ql-menu-item data-analytics-action='Shared to Facebook.' data-analytics-category='Lab' data-analytics-label='Vertex AI: Hyperparameter Tuning' href='https://facebook.com/sharer.php?display=popup&amp;u=https%3A%2F%2Fwww.skills.google%2Fcatalog_lab%2F4414%3Flocale%3Dko%26utm_medium%3Dsocial%26utm_source%3Dfacebook%26utm_campaign%3Dql-social-share' iconSrc='https://www.gstatic.com/images/icons/material/system/2x/post_facebook_black_24dp.png' label='Facebook' role='link' target='_blank'>
+<span class='label'>Facebook</span>
+</ql-menu-item>
+
+<ql-copyable-input label='링크 공유' value='https://www.skills.google/catalog_lab/4414?locale=ko'></ql-copyable-input>
+</ql-menu>
+
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='header-search-button show-tablet' data-toggle='tooltip' icon='search' label='Google Skills 콘텐츠 검색' title='검색'></ql-icon-button>
+
+<div class='toolbar-actions__points'>
+<ql-user-points points='5897' title='참여 점수'></ql-user-points>
+</div>
+<div class='toolbar-actions__streak-count mobile-hide' title='현재 연속 참여 횟수'>
+<img alt="현재 연속 참여 횟수" src="https://cdn.qwiklabs.com/assets/gamification/streak_icon-21476b37c13f49828a5aaa2d86c4d3378cca4117.svg" />
+<div class='ql-body-large count-label'>0</div>
+</div>
+<ql-icon-button class='mobile-hide' data-toggle='tooltip' icon='help_outline' id='help-menu-button' label='도움말 옵션' title='도움말'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:2331402},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support-skills@google.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='의견 보내기' onclick='userfeedback.api.startFeedback(
+{
+&#39;productId&#39;: &#39;5080217&#39;,
+&#39;enableAnonymousFeedback&#39;: true,
+&#39;authuser&#39;: &#39;undefined&#39;,
+&#39;locale&#39;: &#39;ko&#39;
+},
+{
+&#39;user_id&#39;: &#39;2331402&#39;,
+&#39;current_organization&#39;: &#39;&#39;
+})'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+<ql-menu-item href='https://reportingwidget.google.com/widget/54?cid=1&amp;url=https://www.skills.google/course_templates/9/labs/495467?' label='Report Illegal Content'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' data-toggle='tooltip' icon='language' id='language' label='언어 옵션' title='언어'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/course_templates/9/labs/495467?locale=ar' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/course_templates/9/labs/495467?locale=de' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/course_templates/9/labs/495467?locale=en' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/course_templates/9/labs/495467?locale=es' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/course_templates/9/labs/495467?locale=fr' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/course_templates/9/labs/495467?locale=fr_CA' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/course_templates/9/labs/495467?locale=he' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/course_templates/9/labs/495467?locale=id' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/course_templates/9/labs/495467?locale=it' label='italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/course_templates/9/labs/495467?locale=ja' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/course_templates/9/labs/495467?locale=ko' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/course_templates/9/labs/495467?locale=pl' label='polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/course_templates/9/labs/495467?locale=pt_BR' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/course_templates/9/labs/495467?locale=pt_PT' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/course_templates/9/labs/495467?locale=ru' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/course_templates/9/labs/495467?locale=tr' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/course_templates/9/labs/495467?locale=uk' label='українська' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/course_templates/9/labs/495467?locale=zh' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/course_templates/9/labs/495467?locale=zh_TW' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+<!-- Main more button (mobile only) -->
+<ql-icon-button aria-expanded='false' aria-haspopup aria-label='옵션 더보기' class='mobile-show' data-toggle='tooltip' icon='more_vert' id='mobile-more-menu-button' title='옵션 더보기'></ql-icon-button>
+<!-- Main more menu -->
+<ql-menu for='mobile-more-menu-button' id='mobile-more-menu'>
+<!-- Help submenu trigger item -->
+<ql-menu-item aria-controls='help-submenu' aria-expanded='false' aria-haspopup='true' id='help-submenu-button' label='도움말' role='button' tabindex='0'></ql-menu-item>
+<!-- Language Submenu Trigger Item -->
+<ql-menu-item aria-controls='language-submenu' aria-expanded='false' aria-haspopup='true' id='language-submenu-button' label='언어' role='button' tabindex='0'></ql-menu-item>
+</ql-menu>
+<!-- Help Submenu -->
+<!-- This menu is controlled by the item above. -->
+<ql-menu class='submenu' for='help-submenu-button' id='help-submenu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:2331402},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support-skills@google.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='의견 보내기' onclick='userfeedback.api.startFeedback(
+{
+&#39;productId&#39;: &#39;5080217&#39;,
+&#39;enableAnonymousFeedback&#39;: true,
+&#39;authuser&#39;: &#39;undefined&#39;,
+&#39;locale&#39;: &#39;ko&#39;
+},
+{
+&#39;user_id&#39;: &#39;2331402&#39;,
+&#39;current_organization&#39;: &#39;&#39;
+})'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+<ql-menu-item href='https://reportingwidget.google.com/widget/54?cid=1&amp;url=https%3A%2F%2Fwww.skills.google%2Fcourse_templates%2F9%2Flabs%2F495467%3F' label='Report Illegal Content'></ql-menu-item>
+</ql-menu>
+<!-- Language Submenu -->
+<!-- This menu is controlled by the item above. -->
+<ql-menu class='submenu' for='language-submenu-button' id='language-submenu'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/course_templates/9/labs/495467?locale=ar' label='العربية‬‎' lang='ar' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/course_templates/9/labs/495467?locale=de' label='Deutsch' lang='de' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/course_templates/9/labs/495467?locale=en' label='English' lang='en' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/course_templates/9/labs/495467?locale=es' label='español (Latinoamérica)' lang='es' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/course_templates/9/labs/495467?locale=fr' label='français' lang='fr' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/course_templates/9/labs/495467?locale=fr_CA' label='français (Canada)' lang='fr-CA' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/course_templates/9/labs/495467?locale=he' label='עברית' lang='he' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/course_templates/9/labs/495467?locale=id' label='bahasa Indonesia' lang='id' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/course_templates/9/labs/495467?locale=it' label='italiano' lang='it' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/course_templates/9/labs/495467?locale=ja' label='日本語' lang='ja' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/course_templates/9/labs/495467?locale=ko' label='한국어' lang='ko' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/course_templates/9/labs/495467?locale=pl' label='polski' lang='pl' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/course_templates/9/labs/495467?locale=pt_BR' label='português (Brasil)' lang='pt-BR' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/course_templates/9/labs/495467?locale=pt_PT' label='português (Portugal)' lang='pt-PT' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/course_templates/9/labs/495467?locale=ru' label='русский' lang='ru' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/course_templates/9/labs/495467?locale=tr' label='Türkçe' lang='tr' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/course_templates/9/labs/495467?locale=uk' label='українська' lang='uk' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/course_templates/9/labs/495467?locale=zh' label='简体中文' lang='zh' role='menuitem'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/course_templates/9/labs/495467?locale=zh_TW' label='繁體中文' lang='zh-TW' role='menuitem'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button data-toggle='tooltip' id='my_account' label='내 계정' title='내 계정'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocKQrKIm2UPqNfNCTuZY47QI4NsOafdPfB2xwjmDW-Ce=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu'>
+<div class='learner-profile-account-menu my-account-menu'>
+<div class='learner-profile-account-menu__notifications'>
+</div>
+<div class='learner-profile-account-menu__profile'>
+<ql-avatar size='88' src='https://lh3.googleusercontent.com/a/ACg8ocKQrKIm2UPqNfNCTuZY47QI4NsOafdPfB2xwjmDW-Ce=s320-c'></ql-avatar>
+<div class='learner-profile-account-menu__metadata'>
+<h4 class='ql-title-large'>BYOUNHHWA GO</h4>
+<p class='ql-body-medium text--light'>
+</p>
+<div class='ql-body-medium l-mbs'>회원 가입일: 2019</div>
+<a class="ql-title-small" style="text-decoration:none" href="/my_account/payments?locale=ko"><ql-chip class='relaunch' icon='enterprise'>
+Pro
+</ql-chip>
+</a><div class='learner-profile-account-menu__credits'>
+<ql-button href='/subscriptions?locale=ko' label='구독하기' text></ql-button>
+</div>
+</div>
+</div>
+<div class='learner-profile-account-menu__options'>
+<ql-button href='/?locale=ko' icon='dashboard' label='대시보드' text></ql-button>
+<ql-button href='/profile/activity?locale=ko' icon='lists' label='진행 상황' text></ql-button>
+<ql-button href='/my_account/profile?locale=ko' icon='settings' label='설정' text></ql-button>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out?locale=ko' icon='logout' label='로그아웃' method='delete' text></ql-button>
+</div>
+<div class='learner-profile-account-menu__footer'>
+<ql-button href='/privacy_policy?locale=ko' label='개인정보 보호' target='_blank' text></ql-button>
+<ql-button href='/terms_of_service?locale=ko' label='약관' text></ql-button>
+</div>
+</div>
+</ql-menu>
+
+
+
+</div>
+</ql-toolbar>
+</div>
+<!-- / "responsive" value of 768 should be aligned to scss variable "$drawer-responsive-breakpoint" -->
+<ql-drawer id='app-nav' openWidth='15' relaunch responsive='768' slot='drawer' width='6' widthUnit='rem'>
+<nav class='ql-sidenav relaunch'>
+<ql-fab class='navrail-search-button' expandable icon='search' label='검색'></ql-fab>
+<ql-sidenav-item href='/?locale=ko' icon='dashboard' label='대시보드' relaunch>
+
+</ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog?locale=ko' icon='book_2' label='카탈로그' relaunch>
+
+</ql-sidenav-item>
+
+<ql-sidenav-item href='/paths?locale=ko' icon='conversion_path' label='과정' relaunch>
+
+</ql-sidenav-item>
+
+<ql-sidenav-item expandable icon='category' label='컬렉션' relaunch>
+<div class='sub-items' slot='submenu'>
+<ql-sidenav-item href='/collections/ai-boost-bites?locale=ko' label='AI Boost Bites' relaunch>
+
+</ql-sidenav-item>
+
+<ql-sidenav-item href='/collections/career-certificates?locale=ko' label='Career Certificates' relaunch>
+
+</ql-sidenav-item>
+
+<ql-sidenav-item href='/collections/cloud?locale=ko' label='Cloud' relaunch>
+
+</ql-sidenav-item>
+
+<ql-sidenav-item href='/collections/deepmind?locale=ko' label='DeepMind' relaunch>
+
+</ql-sidenav-item>
+
+</div>
+
+</ql-sidenav-item>
+
+<ql-sidenav-item href='/subscriptions?locale=ko' icon='subscriptions' label='구독' relaunch>
+
+</ql-sidenav-item>
+
+</nav>
+
+</ql-drawer>
+<ql-drawer-content class='body-content' slot='drawer-content'>
+<div class='banner'>
+<div id='callout-container'>
+</div>
+
+</div>
+<div class='page-header'>
+<div class='page-main-banner'>
+<div class='page-main-banner-breadcrumbs'>
+<nav aria-label='Breadcrumb' class='breadcrumbs-container' role='navigation'>
+<ol>
+<li class='breadcrumb-item ql-label-medium'>
+<ql-icon-button href='/?locale=ko' icon='home_filled' iconFill></ql-icon-button>
+
+<ql-icon class='breadcrumb-arrow'>navigate_next</ql-icon>
+</li>
+<li class='breadcrumb-item ql-label-medium'>
+<a href="/course_templates/9?locale=ko">기업의 머신러닝</a>
+<ql-icon class='breadcrumb-arrow'>navigate_next</ql-icon>
+</li>
+<li class='breadcrumb-item ql-label-medium' tabindex='0'>
+Vertex AI: 하이퍼파라미터 조정
+</li>
+</ol>
+</nav>
+
+</div>
+<div class='page-main-banner-console-free-trial'>
+<div class='console-free-trial'>
+<p class='console-free-trial-content ql-body-medium'>
+Google Cloud 콘솔에서 기술 적용
+</p>
+<div class='console-free-trial-actions'>
+<ql-button data-analytics-action='gcp_cta' data-analytics-position='free trial banner' data-analytics-type='eventParams' elevated href='https://console.cloud.google.com/freetrial' label='시작하기' target='_blank'></ql-button>
+</div>
+</div>
+</div>
+</div>
+
+<div class='page-banner js-page-banner'>
+<div class='content'><span>
+이 과정의 새 버전이 출시되었습니다.
+<a class='js-upgrade-button' href='javascript:;' onclick='document.querySelector(&quot;#course-session-upgrade-modal&quot;).open()'>
+새 버전으로 업그레이드하는 방법을 자세히 알아보세요.
+</a>
+</span>
+</div>
+<ql-icon-button class='js-close-banner'>close</ql-icon-button>
+</div>
+</div>
+<main id='jump-content'>
+<ql-drawer-container class='course-container'>
+<ql-drawer-content class='course-activity' slot='drawer-content'>
+<div class='course-activity-header'>
+<div class='course-toc-cont'>
+<ql-contents-menu modules='[{&quot;id&quot;:&quot;72418&quot;,&quot;title&quot;:&quot;소개&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈은 과정 및 과정 목표에 대한 개요를 제공합니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502626&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495437&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495437?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:96000,&quot;title&quot;:&quot;과정 소개&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72419&quot;,&quot;title&quot;:&quot;ML 엔터프라이즈 워크플로 이해하기&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈에서는 ML 엔터프라이즈 워크플로와 각 단계의 목적을 설명합니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502627&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495438&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495438?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:15000,&quot;title&quot;:&quot;소개&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502628&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495439&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495439?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:342000,&quot;title&quot;:&quot;ML 엔터프라이즈 워크플로 개요&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502629&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495440&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/quizzes/495440?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1200000,&quot;title&quot;:&quot;퀴즈: ML 엔터프라이즈 워크플로 이해하기&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;quiz&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502630&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495441&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495441?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: ML 엔터프라이즈 워크플로 이해하기&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72420&quot;,&quot;title&quot;:&quot;기업에서의 데이터&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈에서는 Feature Store, Data Catalog, Dataplex, Analytics Hub 등 Google의 기업 데이터 관리 및 데이터 거버넌스 도구를 살펴봅니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502631&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495442&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495442?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:18000,&quot;title&quot;:&quot;소개&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502632&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495443&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495443?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:434000,&quot;title&quot;:&quot;Feature Store&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502633&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495444&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495444?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:161000,&quot;title&quot;:&quot;Data Catalog&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502634&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495445&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495445?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:295000,&quot;title&quot;:&quot;Dataplex&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502635&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495446&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495446?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:251000,&quot;title&quot;:&quot;Analytics Hub&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502636&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495447&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495447?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:203000,&quot;title&quot;:&quot;데이터 전처리 옵션&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502637&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495448&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495448?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:361000,&quot;title&quot;:&quot;Dataprep&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502638&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495449&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495449?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:13000,&quot;title&quot;:&quot;실습 소개: Dataprep으로 전자상거래 분석 파이프라인 탐색 및 생성&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502639&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495450&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/labs/495450?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:5400000,&quot;title&quot;:&quot;Cloud Dataprep v1.5로 전자상거래 분석 파이프라인 탐색 및 생성&quot;,&quot;description&quot;:&quot;이 실습에서는 Cloud Dataprep UI를 탐색하여 예약된 간격으로 실행되고 결과를 BigQuery로 다시 출력하는 전자상거래 변환 파이프라인을 빌드합니다.&quot;,&quot;type&quot;:&quot;lab&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502640&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495451&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/quizzes/495451?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1500000,&quot;title&quot;:&quot;퀴즈: 기업에서의 데이터&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;quiz&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502641&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495452&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495452?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: 기업에서의 데이터&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72421&quot;,&quot;title&quot;:&quot;머신러닝 및 커스텀 학습의 과학&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈에서는 머신러닝 및 신경망의 기술과 과학을 살펴봅니다. Vertex AI를 사용하여 커스텀 ML 모델을 학습시키는 방법도 설명합니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502642&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495453&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495453?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:19000,&quot;title&quot;:&quot;소개&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502643&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495454&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495454?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:415000,&quot;title&quot;:&quot;머신러닝의 기술과 과학&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502644&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495455&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495455?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:486000,&quot;title&quot;:&quot;학습 속도 높이기&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502645&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495456&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495456?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:307000,&quot;title&quot;:&quot;커스텀 학습을 사용하는 경우&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502646&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495457&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495457?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:543000,&quot;title&quot;:&quot;학습 요구사항 및 종속 항목(1부)&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502647&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495458&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495458?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:217000,&quot;title&quot;:&quot;학습 요구사항 및 종속 항목(2부)&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502648&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495459&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495459?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:143000,&quot;title&quot;:&quot;Vertex AI를 사용한 커스텀 ML 모델 학습&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502649&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495460&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/labs/495460?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:3600000,&quot;title&quot;:&quot;Vertex AI Workbench 노트북: Qwik Start&quot;,&quot;description&quot;:&quot;이번 실습에서는 TensorFlow 모델을 학습시키고 서빙(예측)을 위해 Vertex AI에 배포합니다.  짧은 동영상인 \u003cA HREF=\&quot;https://www.youtube.com/watch?v=_Q1Nf-rgSiE\&quot;\u003eGetting started with Notebooks for machine learning\u003c/A\u003e 및 \u003cA HREF=\&quot;https://www.youtube.com/watch?v=rAGauhXYgw4\&quot;\u003eFaster model training and experimentation with Vertex AI\u003c/A\u003e를 시청하세요.&quot;,&quot;type&quot;:&quot;lab&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:true}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502650&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495461&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/quizzes/495461?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;퀴즈: 머신러닝 및 커스텀 학습의 과학&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;quiz&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502651&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495462&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495462?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: 머신러닝 및 커스텀 학습의 과학&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502652&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495463&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495463?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: 머신러닝의 과학 (English only)&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72422&quot;,&quot;title&quot;:&quot;Vertex Vizier 하이퍼파라미터 조정&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈에서는 Vertex AI Vizier를 사용하여 하이퍼파라미터를 조정하는 방법을 설명합니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502653&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495464&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495464?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:13000,&quot;title&quot;:&quot;소개&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502654&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495465&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495465?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:991000,&quot;title&quot;:&quot;Vertex AI Vizier 하이퍼파라미터 조정&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502655&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495466&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495466?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:23000,&quot;title&quot;:&quot;실습 소개: Vertex AI: 하이퍼파라미터 조정&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502656&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495467&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/labs/495467?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:9000000,&quot;title&quot;:&quot;Vertex AI: 하이퍼파라미터 조정&quot;,&quot;description&quot;:&quot;이 실습에서는 Vertex AI를 사용하여 TensorFlow 모델을 위한 하이퍼파라미터 조정 작업을 실행합니다.&quot;,&quot;type&quot;:&quot;lab&quot;,&quot;isComplete&quot;:true,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:true,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502657&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495468&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/quizzes/495468?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1500000,&quot;title&quot;:&quot;퀴즈: Vertex Vizier 하이퍼파라미터 조정&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;quiz&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:true,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502658&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495469&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495469?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: Vertex Vizier 하이퍼파라미터 조정&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:true,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:true,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72423&quot;,&quot;title&quot;:&quot;Vertex AI를 사용한 예측 및 모델 모니터링&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈에서는 Vertex AI 예측 및 모델 모니터링에 대해 설명합니다. 먼저 사전 빌드된 컨테이너 또는 커스텀 컨테이너를 사용한 일괄 및 온라인 예측에 대해 설명한 다음, ML 모델의 성능을 관리하는 데 도움이 되는 서비스인 모델 모니터링을 살펴봅니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502659&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495470&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495470?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:34000,&quot;title&quot;:&quot;소개&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502660&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495471&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495471?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:393000,&quot;title&quot;:&quot;Vertex AI를 사용한 예측&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502661&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495472&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495472?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:506000,&quot;title&quot;:&quot;Vertex AI를 사용한 모델 관리&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502662&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495473&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495473?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:22000,&quot;title&quot;:&quot;실습 소개: Vertex AI 모델 모니터링&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502663&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495474&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/labs/495474?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:9000000,&quot;title&quot;:&quot;Vertex AI 모델 모니터링&quot;,&quot;description&quot;:&quot;모델 모니터링은 프로덕션 및 AI팀이 사전에 잠재적인 문제를 식별하여 비즈니스에 영향을 미치지 않도록 프로덕션의 ML 모델 성능을 면밀히 추적하는 것입니다.&quot;,&quot;type&quot;:&quot;lab&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502664&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495475&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/quizzes/495475?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;퀴즈: Vertex AI를 사용한 예측 및 모델 모니터링&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;quiz&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502665&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495476&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495476?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: Vertex AI를 사용한 예측 및 모델 모니터링&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72424&quot;,&quot;title&quot;:&quot;Vertex AI Pipelines&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈에서는 Vertex AI Pipelines와 이를 빌드하여 ML 워크플로를 조정하는 방법을 설명합니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502666&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495477&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495477?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:15000,&quot;title&quot;:&quot;소개&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502667&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495478&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495478?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:225000,&quot;title&quot;:&quot;Vertex AI Pipelines를 사용한 예측&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502668&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495479&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495479?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:46000,&quot;title&quot;:&quot;실습 소개: Vertex AI Pipelines&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502669&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495480&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495480?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;실습 소개 및 둘러보기: Vertex AI Pipelines&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502670&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495481&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/labs/495481?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:5400000,&quot;title&quot;:&quot;Vertex AI Pipelines 소개&quot;,&quot;description&quot;:&quot;이 실습에서는 Vertex AI Pipelines를 사용하여 ML 파이프라인을 만들고 실행하는 방법을 배웁니다.&quot;,&quot;type&quot;:&quot;lab&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502671&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495482&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/labs/495482?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:3600000,&quot;title&quot;:&quot;Vertex AI 2.5에서 파이프라인 실행&quot;,&quot;description&quot;:&quot;이 실습에서는 Vertex AI Pipelines를 활용해 간단한 Kubeflow Pipelines SDK 파생 ML 파이프라인을 실행하는 방법을 배웁니다.&quot;,&quot;type&quot;:&quot;lab&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502672&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:false,&quot;activities&quot;:[{&quot;id&quot;:&quot;495483&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/quizzes/495483?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1200000,&quot;title&quot;:&quot;퀴즈: Vertex AI Pipelines&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;quiz&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502673&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495484&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495484?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: Vertex AI Pipelines&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72425&quot;,&quot;title&quot;:&quot;ML 개발을 위한 권장사항&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈에서는 Vertex AI의 여러 머신러닝 프로세스의 권장사항을 검토합니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502674&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495485&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495485?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:18000,&quot;title&quot;:&quot;소개&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502675&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495486&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495486?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:131000,&quot;title&quot;:&quot;모델 배포 및 서빙을 위한 권장사항&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502676&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495487&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495487?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:157000,&quot;title&quot;:&quot;모델 모니터링 권장사항&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502677&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495488&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495488?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:227000,&quot;title&quot;:&quot;Vertex AI Pipelines 권장사항&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502678&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495489&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495489?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:115000,&quot;title&quot;:&quot;아티팩트 구성을 위한 권장사항&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502679&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495490&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495490?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: Vertex AI에서의 ML 개발을 위한 권장사항&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72426&quot;,&quot;title&quot;:&quot;과정 요약&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈은 Machine Learning in the Enterprise 과정의 요약입니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502680&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495491&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495491?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;요약&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502681&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495492&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495492?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: 모든 퀴즈 문항&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502682&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495493&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495493?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: 모든 읽기 자료&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502683&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495494&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495494?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: 모든 슬라이드&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;72427&quot;,&quot;title&quot;:&quot;시리즈 요약&quot;,&quot;description&quot;:&quot;\u003cp\u003e이 모듈은 Machine Learning on Google Cloud 과정의 요약입니다.\u003c/p\u003e&quot;,&quot;steps&quot;:[{&quot;id&quot;:&quot;502684&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495495&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/video/495495?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:160000,&quot;title&quot;:&quot;시리즈 요약&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;video&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;502685&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;495496&quot;,&quot;href&quot;:&quot;/course_sessions/4180118/documents/495496?locale=ko&quot;,&quot;isLocked&quot;:false,&quot;duration&quot;:1800000,&quot;title&quot;:&quot;리소스: 권장사항 요약&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;document&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:false},{&quot;id&quot;:&quot;next-steps&quot;,&quot;title&quot;:&quot;다음 단계&quot;,&quot;description&quot;:null,&quot;steps&quot;:[{&quot;id&quot;:&quot;badge-step&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;badge&quot;,&quot;href&quot;:null,&quot;isLocked&quot;:true,&quot;duration&quot;:null,&quot;title&quot;:&quot;과정 배지&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;badge&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:true,&quot;credentialType&quot;:null}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false},{&quot;id&quot;:&quot;survey-0-step&quot;,&quot;prompt&quot;:null,&quot;isOptional&quot;:true,&quot;activities&quot;:[{&quot;id&quot;:&quot;survey-0&quot;,&quot;href&quot;:null,&quot;isLocked&quot;:true,&quot;duration&quot;:null,&quot;title&quot;:&quot;과정 설문조사&quot;,&quot;description&quot;:null,&quot;type&quot;:&quot;survey&quot;,&quot;isComplete&quot;:false,&quot;inProgress&quot;:false,&quot;score&quot;:null,&quot;disabled&quot;:false}],&quot;isComplete&quot;:false,&quot;isTestedOut&quot;:false,&quot;allActivitiesRequired&quot;:false}],&quot;expanded&quot;:true}]' overviewLink='/course_templates/9?locale=ko' selectedContentTitle='Vertex AI: 하이퍼파라미터 조정'></ql-contents-menu>
+<div class='course-toc-buttons'>
+
+<div class='feedback-button-container'>
+<ql-button class='feedback-button' icon='rate_review' label='의견 보내기' onclick='ql.sendFeedback();
+userfeedback.api.startFeedback(
+{
+&#39;productId&#39;: &#39;5080217&#39;,
+&#39;enableAnonymousFeedback&#39;: true,
+&#39;authuser&#39;: &#39;undefined&#39;,
+&#39;locale&#39;: &#39;ko&#39;
+},
+{
+&#39;user_id&#39;: &#39;2331402&#39;,
+&#39;current_organization&#39;: &#39;&#39;
+})' outlined></ql-button>
+</div>
+
+</div>
+</div>
+</div>
+<div class='course-activity-content with-space-for-navigation-buttons' role='region' tabindex='0'>
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>체크포인트</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='대화상자 닫기'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Launch Vertex AI Workbench instance
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button aria-label='Launch Vertex AI Workbench instance의 진행 상황 확인' class='js-show-run-step-button' description='Launch Vertex AI Workbench instance' step_no='1'>
+내 진행 상황 확인하기
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create a Dockerfile and add model training code
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button aria-label='Create a Dockerfile and add model training code의 진행 상황 확인' class='js-show-run-step-button' description='Create a Dockerfile and add model training code' step_no='2'>
+내 진행 상황 확인하기
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Build the container
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button aria-label='Build the container의 진행 상황 확인' class='js-show-run-step-button' description='Build the container' step_no='3'>
+내 진행 상황 확인하기
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Run a hyperparameter tuning job on Vertex AI
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button aria-label='Run a hyperparameter tuning job on Vertex AI의 진행 상황 확인' class='js-show-run-step-button' description='Run a hyperparameter tuning job on Vertex AI' step_no='4'>
+내 진행 상황 확인하기
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-4'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Vertex AI: 하이퍼파라미터 조정&quot;,&quot;lab_name&quot;:&quot;Vertex AI: 하이퍼파라미터 조정&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;google-run&quot;}' data-credits='0.0' data-focus-id='168811157' data-lab-duration='9000' data-parent='course_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-collapsible expanded id='tip-collapsible' useIconButton>
+<div slot='header'>
+<div class='ql-title-small'>실습 설정 안내 및 요구사항</div>
+</div>
+<div slot='collapsible'>
+<div class='ql-body-medium'>계정과 진행 상황을 보호하세요. 이 실습을 실행하려면 항상 시크릿 브라우저 창과 실습 사용자 인증 정보를 사용하세요.</div>
+<ql-button label='안내 보기' onclick='ql.track(&#39;show_lab_instruction_console_expanded_true&#39;); document.getElementById(&#39;private-mode-modal&#39;).open();' outlined></ql-button>
+</div>
+</ql-collapsible>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel onramp' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:9000}' showTimerTooltip studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='ql-display-large lab-preamble__title'>
+Vertex AI: 하이퍼파라미터 조정
+</h1>
+<div class='lab-preamble__details ql-title-medium'>
+<span>
+<ql-icon icon='experiment'></ql-icon>
+실습
+</span>
+<span>
+<ql-icon icon='schedule'></ql-icon>
+2시간 30분
+</span>
+<span>
+<ql-icon>universal_currency_alt</ql-icon>
+크레딧 5개
+</span>
+<span>
+<ql-icon>show_chart</ql-icon>
+고급
+</span>
+</div>
+<div class='lab__rating'>
+<a aria-label="실습 리뷰" href="/focuses/168811157/reviews?locale=ko&amp;parent=course_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.2576'></div>
+
+</a><ql-button aria-label='실습 평가하기' id='rate-lab-btn' label='실습 평가하기' text></ql-button>
+</div>
+<div class='lab-preamble__ai_notice'>
+<ql-infobox>
+<span>
+<ql-icon>info</ql-icon>
+이 실습에는 학습을 지원하는 AI 도구가 통합되어 있을 수 있습니다.
+</span>
+</ql-infobox>
+</div>
+</div>
+<div class='lab-outline-mobile' id='outline_mobile'>
+<div class='header'>
+<div class='ql-label-small'>실습 안내 및 작업</div>
+<ql-toggle-button expandable for='outline_mobile' offIcon='expand_less' onIcon='expand_more'></ql-toggle-button>
+</div>
+<ul class='lab-content__outline'>
+<li><a href="#step1">개요</a></li><li><a href="#step2">Vertex AI 소개</a></li><li><a href="#step3">설정 및 요건</a></li><li><a href="#step4">작업 1. Vertex AI Workbench 인스턴스 실행</a></li><li><a href="#step5">작업 2. 학습 애플리케이션 코드 컨테이너화</a></li><li><a href="#step6">작업 3. Vertex AI에서 하이퍼파라미터 조정 작업 실행</a></li><li><a href="#step7">작업 4. 삭제</a></li><li><a href="#step8">수고하셨습니다</a></li><li><a href="#step9">실습 종료</a></li>
+</ul>
+</div>
+<div class='instruction-signed-in-card'>
+<div class='lab-mobile-card card elevation-2'>
+<img src="https://cdn.qwiklabs.com/assets/labs/send_link_image-5f833bd146929134c423c83e4bb520429ce72180.png" />
+<div class='ql-title-large'>이 콘텐츠는 아직 휴대기기에 최적화되지 않음</div>
+<div class='ql-body-large'>최상의 경험을 위해 데스크톱 컴퓨터에서 이메일로 전송된 링크를 사용하여 방문하세요.</div>
+<ql-button href='/focuses/168811157/resume_on_desktop_email?locale=ko&amp;parent=course_session' icon='link' label='링크 보내기' method='post'></ql-button>
+</div>
+
+</div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">개요</h2>
+<p>이 실습에서는 <a href="https://cloud.google.com/ai-platform-unified/docs?utm_source=codelabs&amp;utm_medium=et&amp;utm_campaign=CDR_sar_aiml_vertexio_&amp;utm_content=-" target="_blank">Vertex AI</a>를 사용하여 TensorFlow 모델을 위해 하이퍼파라미터 조정 작업을 실행하는 방법을 알아봅니다. 이 실습에서는 모델 코드에 TensorFlow를 사용하지만 다른 프레임워크로 쉽게 교체할 수 있습니다.</p>
+<h3>학습 목표</h3>
+<ul>
+<li>Workbench 인스턴스 노트북 만들기</li>
+<li>하이퍼파라미터 조정을 위한 학습 애플리케이션 코드 수정</li>
+<li>Vertex AI UI에서 하이퍼파라미터 조정 작업 실행</li>
+</ul>
+<h2 id="step2">Vertex AI 소개</h2>
+<p>이 실습에서는 Google Cloud에서 제공되는 최신 AI 제품을 사용합니다. <a href="https://cloud.google.com/ai-platform-unified/docs?utm_source=codelabs&amp;utm_medium=et&amp;utm_campaign=CDR_sar_aiml_vertexio_&amp;utm_content=-" target="_blank">Vertex AI</a>는 Google Cloud 전반의 ML 제품을 원활한 개발 환경으로 통합합니다. 예전에는 AutoML로 학습된 모델과 커스텀 모델은 별도의 서비스를 통해 액세스할 수 있었습니다. 새 서비스는 다른 새로운 제품과 함께 두 가지 모두를 단일 API로 결합합니다. 기존 프로젝트를 Vertex AI로 마이그레이션할 수도 있습니다. 의견이 있는 경우 <a href="https://cloud.google.com/vertex-ai/docs/support/getting-support" target="_blank">지원 페이지</a>를 참조하세요.</p>
+<p>Vertex AI에는 엔드 투 엔드 ML 워크플로를 지원하는 다양한 제품이 포함되어 있습니다. 이 실습에서는 아래에 강조 표시된 학습/HP 조정 및 Notebooks 제품에 중점을 둡니다.</p>
+<p><img alt="Vertex AI 워크플로 및 제품 다이어그램" src="https://cdn.qwiklabs.com/Q4vrDDMIwR4Z2y1thcjFG4RZb0ibmJcNUWpb404B4ao%3D"></p>
+<p>Vertex AI는 두 가지 노트북 솔루션인 Workbench와 Colab Enterprise를 제공합니다.</p>
+<p><img alt="Colab" src="https://cdn.qwiklabs.com/oie74zk3GFsnsALtM%2BZJvmvpsFKJggZtdbIxmPRKVQo%3D"></p>
+<h3>Workbench</h3>
+<p>Vertex AI Workbench는 제어 및 맞춤설정을 우선시하는 프로젝트에 적합한 옵션입니다. 복잡한 종속 항목을 지닌 여러 파일에 걸쳐져 있는 프로젝트에 적합합니다. 워크스테이션이나 노트북에서 클라우드로 전환하는 데이터 과학자에게도 적합한 옵션입니다.</p>
+<p>Vertex AI Workbench 인스턴스에는 TensorFlow 및 PyTorch 프레임워크 지원을 포함하여 딥 러닝 패키지 모음이 사전 설치되어 있습니다.</p>
+<p><img alt="workbench1" src="https://cdn.qwiklabs.com/S54mFElO%2FwqQD4iDWJd3XszfD1T5fnV3P5fv932%2FOwE%3D"></p>
+<h2 id="step3">설정 및 요건</h2>
+<p>각 실습에서는 정해진 기간 동안 새 Google Cloud 프로젝트와 리소스 집합이 무료로 제공됩니다.</p>
+<ol>
+<li>
+<p><strong>시크릿 창</strong>을 사용하여 Qwiklabs에 로그인합니다.</p>
+</li>
+<li>
+<p>실습 사용 가능 시간(예: <code>1:15:00</code>)을 참고하여 해당 시간 내에 완료합니다.<br>
+일시중지 기능은 없습니다. 필요한 경우 다시 시작할 수 있지만 처음부터 시작해야 합니다.</p>
+</li>
+<li>
+<p>준비가 되면 <strong>실습 시작</strong>을 클릭합니다.</p>
+</li>
+<li>
+<p>실습 사용자 인증 정보(<strong>사용자 이름</strong> 및 <strong>비밀번호</strong>)를 기록해 두세요. Google Cloud Console에 로그인합니다.</p>
+</li>
+<li>
+<p><strong>Google Console 열기</strong>를 클릭합니다.</p>
+</li>
+<li>
+<p><strong>다른 계정 사용</strong>을 클릭한 다음, 안내 메시지에 <strong>이</strong> 실습에 대한 사용자 인증 정보를 복사하여 붙여넣습니다.<br>
+다른 사용자 인증 정보를 사용하는 경우 오류가 발생하거나 <strong>요금이 부과</strong>됩니다.</p>
+</li>
+<li>
+<p>약관에 동의하고 리소스 복구 페이지를 건너뜁니다.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>참고:</strong> 실습을 완료했거나 다시 시작하려고 하는 경우가 아니면 <strong>실습 종료</strong>를 클릭하지 마세요. 클릭하면 작업이 지워지고 프로젝트가 삭제됩니다.
+  </p>
+</aside>
+
+<h3>Compute Engine API 사용 설정</h3>
+<ol>
+<li>
+<p>Cloud 콘솔에서 <strong>탐색 메뉴</strong> &gt; <strong>API 및 서비스</strong> &gt; <strong>라이브러리</strong>를 클릭합니다.</p>
+</li>
+<li>
+<p><strong>Compute Engine API</strong>를 검색한 다음 아직 사용 설정되어 있지 않으면 <strong>사용 설정</strong>을 클릭합니다. 이것은 노트북 인스턴스를 생성하는 데 필요합니다.</p>
+</li>
+</ol>
+<h3>Container Registry API 사용 설정</h3>
+<ol>
+<li>
+<p>Cloud 콘솔에서 <strong>탐색 메뉴</strong> &gt; <strong>API 및 서비스</strong> &gt; <strong>라이브러리</strong>를 클릭합니다.</p>
+</li>
+<li>
+<p><strong>Google Container Registry API</strong>를 검색하고 사용 설정되지 않았다면 <strong>사용 설정</strong>을 선택합니다. 이를 사용하여 커스텀 학습 작업을 위한 컨테이너를 생성합니다.</p>
+</li>
+</ol>
+<h2 id="step4">작업 1. Vertex AI Workbench 인스턴스 실행</h2>
+<ol>
+<li>
+<p>Google Cloud 콘솔의 <strong>탐색 메뉴</strong>(<img alt="탐색 메뉴" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">)에서 <strong>Vertex AI</strong>를 선택합니다.</p>
+</li>
+<li>
+<p><strong>모든 권장 API 사용 설정</strong>을 클릭합니다.</p>
+</li>
+<li>
+<p><strong>탐색 메뉴</strong>에서 <strong>Workbench</strong>를 클릭합니다.</p>
+<p>Workbench 페이지 상단에서 <strong>인스턴스</strong> 뷰에 있는지 확인합니다.</p>
+</li>
+<li>
+<p><img alt="상자 추가" src="https://cdn.qwiklabs.com/HQyUcFMAfKlIqKrZHc4akIou7AGrAWnJ1AXcmQyzoI0%3D"><strong>새로 만들기</strong>를 클릭합니다.</p>
+</li>
+<li>
+<p><strong>인스턴스를 구성합니다</strong>.</p>
+<ul>
+<li>
+<strong>이름</strong>: lab-workbench</li>
+<li>
+<strong>리전</strong>: 리전을 <ql-variable key="project_0.default_region" placeholder="Region"></ql-variable>(으)로 설정합니다.</li>
+<li>
+<strong>영역</strong>: 영역을 <ql-variable key="project_0.default_zone" placeholder="Zone"></ql-variable>(으)로 설정합니다.</li>
+<li>
+<strong>고급 옵션</strong>(선택사항): 필요한 경우 '고급 옵션'을 클릭하여 추가로 맞춤설정(예: 머신 유형, 디스크 크기)할 수 있습니다.</li>
+</ul>
+</li>
+</ol>
+<p><img alt="Vertex AI Workbench 인스턴스 생성" src="https://cdn.qwiklabs.com/ewEOhN4Pzoslzu0c5s%2F4J86zKlt9P%2B%2BzKVPmJQqmzbo%3D"></p>
+<ol start="6">
+<li>
+<strong>만들기</strong>를 클릭합니다.</li>
+</ol>
+<p>인스턴스를 만드는 데 몇 분 정도 걸립니다. 준비되면 이름 옆에 녹색 체크표시가 나타납니다.</p>
+<ol start="7">
+<li>인스턴스 이름 옆에 있는 <strong>JupyterLab 열기</strong>를 클릭하여 JupyterLab 인터페이스를 실행합니다. 그러면 브라우저에서 새 탭이 열립니다.</li>
+</ol>
+<p><img alt="Workbench 인스턴스 배포됨" src="https://cdn.qwiklabs.com/RgDzSVR7atBsqF2pkz7tF8Lxa7s4gKUr76Ijdkwij%2BY%3D"></p>
+
+<ql-infobox><strong>참고: </strong>이 실습에서 학습하고 조정할 모델은 <a href="https://www.tensorflow.org/datasets" target="_blank">TensorFlow Datasets</a>의 <a href="https://www.tensorflow.org/datasets/catalog/horses_or_humans" target="_blank">horses or humans dataset</a>로 학습된 이미지 분류 모델입니다.</ql-infobox>
+<p><strong>내 진행 상황 확인하기</strong>를 클릭하여 목표를 확인합니다.
+<ql-activity-tracking step="1">
+Vertex AI Workbench 인스턴스 실행
+</ql-activity-tracking></p>
+<h2 id="step5">작업 2. 학습 애플리케이션 코드 컨테이너화</h2>
+<p>학습 애플리케이션 코드를 Docker 컨테이너에 넣고 이 컨테이너를 Google Container Registry로 푸시하여 이 하이퍼파라미터 조정 작업을 Vertex에 제출합니다. 이 방식을 사용하면 모든 프레임워크로 빌드된 모델의 하이퍼파라미터를 조정할 수 있습니다.</p>
+<ol>
+<li>JupyterLab의 <strong>Launcher(런처)</strong> 메뉴에서 노트북 인스턴스의 <strong>Terminal(터미널)</strong> 창을 엽니다.</li>
+</ol>
+<p><img alt="Open_a_Terminal_window" src="https://cdn.qwiklabs.com/lSlqiJ5LimPEu3CSscgvzFS%2F8%2Bhb8YWIqKzal8UaiPk%3D"></p>
+<ol start="2">
+<li>
+<code>horses_or_humans</code>라는 새 디렉터리를 만들고 cd 명령어를 사용해 이 디렉터리로 변경하세요.</li>
+</ol>
+<ql-code-block language="plaintext">
+mkdir horses_or_humans
+cd horses_or_humans
+</ql-code-block>
+<h3>Dockerfile 만들기</h3>
+<p>코드를 컨테이너화하는 첫 번째 단계는 Dockerfile을 만드는 것입니다. Dockerfile에는 이미지를 실행하는 데 필요한 모든 명령어가 포함됩니다. <a href="https://github.com/GoogleCloudPlatform/cloudml-hypertune" target="_blank">CloudML Hypertune 라이브러리</a>를 포함하여 필요한 모든 라이브러리를 설치하고 학습 코드의 진입점을 설정합니다.</p>
+<ol>
+<li>
+<strong>터미널</strong>에서 빈 <strong>Dockerfile</strong>을 만듭니다.</li>
+</ol>
+<ql-code-block language="plaintext">
+touch Dockerfile
+</ql-code-block>
+<ol start="2">
+<li>왼쪽 메뉴에서 <strong>Dockerfile</strong>을 열고 다음을 복사해서 붙여넣습니다.</li>
+</ol>
+<ql-code-block language="plaintext">
+FROM gcr.io/deeplearning-platform-release/tf2-gpu.2-9
+
+WORKDIR /
+
+# Installs hypertune library
+RUN pip install cloudml-hypertune
+
+# Copies the trainer code to the docker image.
+COPY trainer /trainer
+
+# Sets up the entry point to invoke the trainer.
+ENTRYPOINT ["python", "-m", "trainer.task"]
+</ql-code-block>
+<ol start="3">
+<li>Ctrl + S를 눌러 파일을 저장합니다.</li>
+</ol>
+<p>이 Dockerfile은 <a href="https://cloud.google.com/ai-platform/deep-learning-containers/docs/choosing-container#choose_a_container_image_type?utm_campaign=CDR_sar_aiml_ucaiplabs_011321&amp;utm_source=external&amp;utm_medium=web" target="_blank">Deep Learning Container TensorFlow Enterprise 2.9 GPU Docker 이미지</a>를 사용합니다. Google Cloud의 Deep Learning Containers에는 많은 수의 일반적인 ML 및 데이터 과학 프레임워크가 사전 설치된 상태로 제공됩니다.</p>
+<p>해당 이미지를 다운로드한 후 이 Dockerfile은 학습 코드의 진입점을 설정합니다. 아직 이 파일을 만들지 않았습니다. 다음 단계에서 모델을 학습시키고 조정하기 위한 코드를 추가할 것입니다.</p>
+<h3>모델 학습 코드 추가</h3>
+<ol>
+<li>터미널에서 다음을 실행하여 학습 코드용 디렉터리와 코드를 추가할 Python 파일을 만듭니다.</li>
+</ol>
+<ql-code-block language="plaintext">
+mkdir trainer
+touch trainer/task.py
+</ql-code-block>
+<p>이제 <code>horse_or_humans/</code> 디렉터리에 다음이 포함됩니다.</p>
+<ql-code-block nowrap output="">
++ Dockerfile
++ trainer/
+    + task.py
+</ql-code-block>
+<ol start="2">
+<li>다음으로 방금 만든 <strong>task.py</strong> 파일을 열고 아래 코드를 복사합니다.</li>
+</ol>
+<ql-code-block language="plaintext">
+import tensorflow as tf
+import tensorflow_datasets as tfds
+import argparse
+import hypertune
+
+NUM_EPOCHS = 10
+
+
+def get_args():
+  '''Parses args. Must include all hyperparameters you want to tune.'''
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+      '--learning_rate',
+      required=True,
+      type=float,
+      help='learning rate')
+  parser.add_argument(
+      '--momentum',
+      required=True,
+      type=float,
+      help='SGD momentum value')
+  parser.add_argument(
+      '--num_neurons',
+      required=True,
+      type=int,
+      help='number of units in last hidden layer')
+  args = parser.parse_args()
+  return args
+
+
+def preprocess_data(image, label):
+  '''Resizes and scales images.'''
+
+  image = tf.image.resize(image, (150,150))
+  return tf.cast(image, tf.float32) / 255., label
+
+
+def create_dataset():
+  '''Loads Horses Or Humans dataset and preprocesses data.'''
+
+  data, info = tfds.load(name='horses_or_humans', as_supervised=True, with_info=True)
+
+  # Create train dataset
+  train_data = data['train'].map(preprocess_data)
+  train_data  = train_data.shuffle(1000)
+  train_data  = train_data.batch(64)
+
+  # Create validation dataset
+  validation_data = data['test'].map(preprocess_data)
+  validation_data  = validation_data.batch(64)
+
+  return train_data, validation_data
+
+
+def create_model(num_neurons, learning_rate, momentum):
+  '''Defines and complies model.'''
+
+  inputs = tf.keras.Input(shape=(150, 150, 3))
+  x = tf.keras.layers.Conv2D(16, (3, 3), activation='relu')(inputs)
+  x = tf.keras.layers.MaxPooling2D((2, 2))(x)
+  x = tf.keras.layers.Conv2D(32, (3, 3), activation='relu')(x)
+  x = tf.keras.layers.MaxPooling2D((2, 2))(x)
+  x = tf.keras.layers.Conv2D(64, (3, 3), activation='relu')(x)
+  x = tf.keras.layers.MaxPooling2D((2, 2))(x)
+  x = tf.keras.layers.Flatten()(x)
+  x = tf.keras.layers.Dense(num_neurons, activation='relu')(x)
+  outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+  model = tf.keras.Model(inputs, outputs)
+  model.compile(
+      loss='binary_crossentropy',
+      optimizer=tf.keras.optimizers.SGD(learning_rate=learning_rate, momentum=momentum),
+      metrics=['accuracy'])
+  return model
+
+
+def main():
+  args = get_args()
+  train_data, validation_data = create_dataset()
+  model = create_model(args.num_neurons, args.learning_rate, args.momentum)
+  history = model.fit(train_data, epochs=NUM_EPOCHS, validation_data=validation_data)
+
+  # DEFINE METRIC
+  hp_metric = history.history['val_accuracy'][-1]
+
+  hpt = hypertune.HyperTune()
+  hpt.report_hyperparameter_tuning_metric(
+      hyperparameter_metric_tag='accuracy',
+      metric_value=hp_metric,
+      global_step=NUM_EPOCHS)
+
+
+if __name__ == "__main__":
+    main()
+</ql-code-block>
+<ol start="3">
+<li>Ctrl + S를 눌러 파일을 저장합니다.</li>
+</ol>
+<p>컨테이너를 빌드하기 전에 코드를 자세히 살펴보겠습니다. 하이퍼파라미터 조정 서비스 사용과 관련된 몇 가지 구성요소가 있습니다.</p>
+<ul>
+<li>
+<p>스크립트는 <code>hypertune</code> 라이브러리를 가져옵니다. 1단계의 Dockerfile에는 이 라이브러리를 pip 설치하는 지침이 포함되어 있습니다.</p>
+</li>
+<li>
+<p><code>get_args()</code> 함수는 조정하려는 각 하이퍼파라미터에 대한 명령줄 인수를 정의합니다. 이 예에서 조정될 하이퍼파라미터는 학습률, 옵티마이저의 모멘텀 값, 모델의 마지막 히든 레이어의 뉴런 수이지만 자유롭게 실험해도 됩니다. 그런 다음 코드에서 해당 인수에 전달된 값을 사용하여 해당 하이퍼파라미터를 설정합니다.</p>
+</li>
+<li>
+<p><code>main()</code> 함수의 끝에서 <code>hypertune</code> 라이브러리를 사용하여 최적화하려는 측정항목을 정의합니다. TensorFlow에서 keras <code>model.fit</code> 메서드는 <code>History</code> 객체를 반환합니다. <code>History.history</code> 속성은 연속적인 에포크에서의 학습 손실 값과 측정항목 값의 기록입니다. <code>model.fit</code>에 유효성 검사 데이터를 전달하면 <code>History.history</code> 속성에 유효성 검사 손실 및 측정항목 값도 포함됩니다.
+예를 들어 유효성 검사 데이터로 3개의 에포크에 대한 모델을 학습하고 <code>accuracy</code>를 측정항목으로 제공한 경우 <code>History.history</code> 속성은 다음 딕셔너리와 유사하게 나타납니다.</p>
+</li>
+</ul>
+<ql-code-block language="plaintext" output="">
+{
+ "accuracy": [
+   0.7795261740684509,
+   0.9471358060836792,
+   0.9870933294296265
+ ],
+ "loss": [
+   0.6340447664260864,
+   0.16712145507335663,
+   0.04546636343002319
+ ],
+ "val_accuracy": [
+   0.3795261740684509,
+   0.4471358060836792,
+   0.4870933294296265
+ ],
+ "val_loss": [
+   2.044623374938965,
+   4.100203514099121,
+   3.0728273391723633
+ ]
+</ql-code-block>
+<p>하이퍼파라미터 조정 서비스가 모델의 유효성 검사 정확도를 최대화하는 값을 검색하도록 하려면 측정항목을 <code>val_accuracy</code> 목록의 마지막 항목(또는 <code>NUM_EPOCS - 1</code>)으로 정의합니다. 그런 다음 이 측정항목을 <code>HyperTune</code>의 인스턴스에 전달합니다. <code>hyperparameter_metric_tag</code>에 대해 원하는 문자열을 선택할 수 있지만 나중에 하이퍼파라미터 조정 작업을 시작할 때 해당 문자열을 다시 사용해야 합니다.</p>
+<p><strong>내 진행 상황 확인하기</strong>를 클릭하여 목표를 확인합니다.
+<ql-activity-tracking step="2">
+Dockerfile 만들기 및 모델 학습 코드 추가
+</ql-activity-tracking></p>
+<h3>컨테이너 빌드</h3>
+<ol>
+<li>터미널에서 다음을 실행하여 프로젝트의 env 변수를 정의하고 <code>your-cloud-project</code>를 프로젝트 ID로 바꿉니다.</li>
+</ol>
+<ql-infobox><strong>참고: </strong>터미널에서 <code>gcloud config list --format 'value(core.project)'</code>를 실행하여 프로젝트 ID를 얻을 수 있습니다.</ql-infobox>
+<ql-code-block language="plaintext">
+PROJECT_ID='your-cloud-project'
+</ql-code-block>
+<ol start="2">
+<li>Google Container Registry에서 컨테이너 이미지의 URI로 변수를 정의합니다.</li>
+</ol>
+<ql-code-block language="plaintext">
+IMAGE_URI="gcr.io/$PROJECT_ID/horse-human:hypertune"
+</ql-code-block>
+<ol start="3">
+<li>그런 다음 <strong>horses_or_humans</strong> 디렉터리의 루트에서 다음을 실행하여 컨테이너를 빌드합니다.</li>
+</ol>
+<ql-code-block language="plaintext">
+docker build ./ -t $IMAGE_URI
+</ql-code-block>
+<ol start="4">
+<li>마지막으로 Google Container Registry에 푸시합니다.</li>
+</ol>
+<ql-code-block language="plaintext">
+docker push $IMAGE_URI
+</ql-code-block>
+<p>컨테이너가 Container Registry로 푸시되었으므로 이제 커스텀 모델 하이퍼파라미터 조정 작업을 시작할 준비가 되었습니다.</p>
+<p><strong>내 진행 상황 확인하기</strong>를 클릭하여 목표를 확인합니다.
+<ql-activity-tracking step="3">
+컨테이너 빌드
+</ql-activity-tracking></p>
+<h2 id="step6">작업 3. Vertex AI에서 하이퍼파라미터 조정 작업 실행</h2>
+<p>이 실습에서는 Google Container Registry의 커스텀 컨테이너를 통한 커스텀 학습을 사용하지만 사전 빌드된 컨테이너로 하이퍼파라미터 조정 작업을 실행할 수도 있습니다.</p>
+<ul>
+<li>Cloud 콘솔에서 Vertex AI의 <strong>학습</strong> 섹션으로 이동합니다.</li>
+<li>Vertex AI API의 경우 <strong>사용 설정</strong>을 클릭하고 <strong>닫기</strong>를 클릭합니다.</li>
+</ul>
+<h3>학습 작업 구성</h3>
+<ol>
+<li>
+<p><strong>새 모델 학습</strong>을 클릭하여 하이퍼파라미터 조정 작업을 위한 파라미터를 입력합니다.</p>
+<ul>
+<li>
+<strong>데이터 세트</strong>에서 <strong>관리형 데이터 세트 없음</strong>을 선택합니다.</li>
+<li>학습 방법으로 <strong>커스텀 학습(고급)</strong>을 선택하고 <strong>계속</strong>을 클릭합니다.</li>
+<li>
+<strong>모델 이름</strong>에 <code>horses-humans-hyptertune</code>(또는 원하는 모델 이름)을 입력합니다.</li>
+<li>
+<strong>계속</strong>을 클릭합니다.</li>
+</ul>
+</li>
+<li>
+<p><strong>학습 컨테이너</strong> 단계에서 <strong>커스텀 컨테이너</strong>를 선택합니다.</p>
+<ul>
+<li>
+<strong>커스텀 컨테이너 설정</strong>에서 <strong>컨테이너 이미지</strong>에 대해 이전 섹션의 <strong>IMAGE_URI</strong> 변수 값을 입력합니다. 사용자 고유의 프로젝트 이름이 포함된 <code>gcr.io/&lt;your-cloud-project&gt;/horse-human:hypertune</code>이어야 합니다. 나머지 필드는 비워 두고 <strong>계속</strong>을 클릭합니다.</li>
+</ul>
+</li>
+</ol>
+<h3>하이퍼파라미터 조정 작업 구성</h3>
+<ul>
+<li>
+<strong>하이퍼파라미터 조정 사용 설정</strong>을 선택합니다.</li>
+</ul>
+<h4>하이퍼파라미터 구성</h4>
+<p>다음으로 학습 애플리케이션 코드에서 명령줄 인수로 설정한 하이퍼파라미터를 추가해야 합니다. 하이퍼파라미터를 추가할 때 먼저 이름을 제공해야 합니다. 이것은 <code>argparse</code>에 전달한 인수 이름과 일치해야 합니다.</p>
+<ol>
+<li>
+<p><strong>매개변수 이름</strong>에 <code>learning_rate</code>를 입력합니다.</p>
+</li>
+<li>
+<p><strong>유형</strong>으로 <strong>실수(Double)</strong>를 선택합니다.</p>
+</li>
+<li>
+<p><strong>최솟값</strong>에 <code>0.01</code>, <strong>최댓값</strong>에 <code>1</code>을 입력합니다.</p>
+</li>
+<li>
+<p><strong>확장</strong>으로 <strong>로그</strong>를 선택합니다.</p>
+</li>
+<li>
+<p><strong>완료</strong>를 클릭합니다.</p>
+</li>
+<li>
+<p><code>learning_rate</code> 하이퍼파라미터를 추가한 후 <code>momentum</code> 및 <code>num_neurons</code>에 대한 파라미터를 추가합니다.</p>
+</li>
+</ol>
+<ul>
+<li>
+<p><strong>momentum</strong>:</p>
+<ul>
+<li>
+<strong>초매개변수 추가</strong>를 클릭합니다.</li>
+<li>
+<strong>매개변수 이름</strong>에 <code>momentum</code>을 입력합니다.</li>
+<li>
+<strong>유형</strong>으로 <strong>실수(Double)</strong>를 선택합니다.</li>
+<li>
+<strong>최솟값</strong>에 <code>0</code>, <strong>최댓값</strong>에 <code>1</code>을 입력합니다.</li>
+<li>
+<strong>확장</strong>으로 <strong>선형</strong>을 선택합니다.</li>
+<li>
+<strong>완료</strong>를 클릭합니다.</li>
+</ul>
+</li>
+<li>
+<p><strong>num_neurons</strong>:</p>
+<ul>
+<li>
+<strong>초매개변수 추가</strong>를 클릭합니다.</li>
+<li>
+<strong>매개변수 이름</strong>에 <code>num_neurons</code>를 입력합니다.</li>
+<li>
+<strong>유형</strong>으로 <strong>개별 값</strong>을 선택합니다.</li>
+<li>
+<strong>값</strong>에 <code>64,128,512</code>를 입력합니다.</li>
+<li>
+<strong>확장</strong>으로 <strong>확장 안함</strong>을 선택합니다.</li>
+<li>
+<strong>완료</strong>를 클릭합니다.</li>
+</ul>
+</li>
+</ul>
+<h4>측정항목 구성</h4>
+<p>초매개변수를 추가한 후에는 최적화하려는 측정항목과 목표를 제공합니다. 이것은 학습 애플리케이션에서 설정한 <strong>hyperparameter_metric_tag</strong>와 동일해야 합니다.</p>
+<ol>
+<li>
+<strong>최적화할 측정항목</strong>에 <code>정확성</code>을 입력합니다.</li>
+<li>
+<strong>목표</strong>로 <strong>최대화</strong>를 선택합니다.</li>
+</ol>
+<p>Vertex AI 하이퍼파라미터 조정 서비스는 이전 단계에서 구성된 값을 사용하여 학습 애플리케이션을 여러 번 실행합니다. 서비스 실행 시도 횟수에 상한값을 설정해야 합니다.</p>
+<p>더 많이 시도하면 일반적으로 결과가 향상되지만, 반환되는 결과가 감소하는 시점이 있습니다. 그 이후에는 추가로 시도해도 최적화할 측정항목에 거의 또는 전혀 영향을 미치지 않습니다. 처음에는 시도 횟수를 적게 설정하고 선택한 초매개변수가 미치는 영향을 파악한 후 시도 횟수를 늘리는 것이 좋습니다.</p>
+<p>병렬 시도 횟수의 상한값도 설정해야 합니다. 병렬 시도 횟수를 늘리면 하이퍼파라미터 조정 작업을 실행하는 데 걸리는 시간이 줄어듭니다. 하지만 전체적으로 작업의 효율성이 떨어질 수 있습니다. 기본 조정 전략에서는 이전 시도의 결과를 바탕으로 후속 시도에서 값을 할당하기 때문입니다. 너무 많은 시도를 병렬로 실행하면 시도가 시작될 때 기존에 실행 중인 시도의 결과를 활용하지 못할 수 있습니다.</p>
+<ol start="3">
+<li>
+<p>시연 목적으로 <strong>최대 시도 횟수</strong>를 <code>15</code>로 설정하고 <strong>최대 병렬 시도 횟수</strong>를 <code>3</code>으로 설정할 수 있습니다. 다른 숫자로 실험할 수 있지만 이로 인해 조정 시간이 길어지고 비용이 증가할 수 있습니다.</p>
+</li>
+<li>
+<p><strong>기본값</strong>을 <strong>알고리즘</strong>으로 선택하면 알고리즘이 Google Vizier를 사용하여 하이퍼파라미터 조정을 위한 베이즈 최적화를 수행합니다. 이 알고리즘에 대한 자세한 내용은 <a href="https://cloud.google.com/blog/products/ai-machine-learning/hyperparameter-tuning-cloud-machine-learning-engine-using-bayesian-optimization" target="_blank">베이즈 최적화를 사용하여 Cloud Machine Learning Engine의 초매개변수 조정</a> 블로그에서 확인할 수 있습니다.</p>
+</li>
+<li>
+<p><strong>계속</strong>을 클릭합니다.</p>
+</li>
+</ol>
+<h3>컴퓨팅 구성</h3>
+<p><strong>컴퓨팅 및 가격 책정</strong>에서 선택한 리전을 그대로 두고 <strong>컴퓨팅 설정</strong>에서 <strong>새 작업자 풀에 배포</strong>를 선택합니다.</p>
+<p><strong>작업자 풀 0</strong>을 다음과 같이 구성합니다.</p>
+<ol>
+<li>
+<strong>머신 유형</strong>에서 <strong>표준</strong> &gt; <strong>n1-standard-4</strong>을 선택합니다. 
+</li>
+<li>
+<strong>디스크 유형</strong>에서 <strong>SSD</strong>를 선택합니다.</li>
+<li>
+<strong>디스크 크기(GB)</strong>에 <code>100</code>을 입력합니다.</li>
+<li>하이퍼파라미터 조정 작업을 시작하려면 <strong>학습 시작</strong>을 클릭합니다. 콘솔의 <strong>학습</strong> 섹션에서 <strong>초매개변수 조정 작업</strong> 탭에 다음과 같은 내용이 표시됩니다.
+</li>
+</ol>
+<p><img alt="하이퍼파라미터 조정 작업을 표시하는 학습 페이지" src="https://cdn.qwiklabs.com/NABSzSegMXZrc4K07qCJEoMoaABQAb6onq84TpwdaYw%3D"></p>
+<ql-infobox><strong>참고:</strong> 초매개변수 조정 작업을 완료하는 데 약 <b>55~60분</b>이 걸립니다.</ql-infobox>
+<p>완료되면 작업 이름을 클릭하고 조정 시도 결과를 볼 수 있습니다.</p>
+<p><img alt="하이퍼파라미터 출력" src="https://cdn.qwiklabs.com/le2h%2BfzoEwIUSdOAxX7T2CR4sqnh1U%2FtcLAQ0YFtUF4%3D"></p>
+<p><strong>내 진행 상황 확인하기</strong>를 클릭하여 목표를 확인합니다.
+<ql-activity-tracking step="4">
+Vertex AI에서 하이퍼파라미터 조정 작업 실행
+</ql-activity-tracking></p>
+
+<h2 id="step7">작업 4. 삭제</h2>
+<ol>
+<li>
+<p>이 실습에서 만든 노트북을 계속 사용하려면 사용하지 않을 때 노트북을 끄는 것이 좋습니다. Cloud 콘솔의 Notebooks UI에서 노트북을 선택한 다음 <strong>중지</strong>를 선택합니다.</p>
+<p>노트북을 완전히 삭제하려면 오른쪽 상단에 있는 <strong>삭제</strong> 버튼을 클릭하면 됩니다.</p>
+</li>
+<li>
+<p>스토리지 버킷을 삭제하려면 <strong>탐색 메뉴</strong> &gt; <strong>Cloud Storage</strong>로 이동하여 버킷을 선택하고 <strong>삭제</strong>를 클릭합니다.</p>
+</li>
+</ol>
+<h2 id="step8">수고하셨습니다</h2>
+<p>Vertex AI를 사용하여 다음을 수행하는 방법을 배웠습니다.</p>
+<p>커스텀 컨테이너에서 제공되는 학습 코드에 하이퍼파라미터 조정 작업 시작하기. 이 예에서는 TensorFlow 모델을 사용했지만 커스텀 또는 기본 제공되는 컨테이너를 사용하여 모든 프레임워크로 빌드된 모델을 학습시킬 수 있습니다.
+Vertex의 다른 부분에 대해 자세히 알아보려면 <a href="https://cloud.google.com/ai-platform-unified/docs?utm_source=codelabs&amp;utm_medium=et&amp;utm_campaign=CDR_sar_aiml_vertexio_&amp;utm_content=-" target="_blank">Vertex AI 문서</a>를 확인하세요.</p>
+<h2 id="step9">실습 종료</h2>
+<p>실습을 완료하면 <strong>실습 종료</strong>를 클릭합니다. Qwiklabs에서 사용된 리소스를 자동으로 삭제하고 계정을 지웁니다.</p>
+<p>실습 경험을 평가할 수 있습니다. 해당하는 별표 수를 선택하고 의견을 입력한 후 <strong>제출</strong>을 클릭합니다.</p>
+<p>별점의 의미는 다음과 같습니다.</p>
+<ul>
+<li>별표 1개 = 매우 불만족</li>
+<li>별표 2개 = 불만족</li>
+<li>별표 3개 = 중간</li>
+<li>별표 4개 = 만족</li>
+<li>별표 5개 = 매우 만족</li>
+</ul>
+<p>의견을 제공하고 싶지 않다면 대화상자를 닫으면 됩니다.</p>
+<p>의견이나 제안 또는 수정할 사항이 있다면 <strong>지원</strong> 탭을 사용하세요.</p>
+
+<p>Copyright 2020 Google LLC All rights reserved. Google 및 Google 로고는 Google LLC의 상표입니다. 기타 모든 회사명 및 제품명은 해당 업체의 상표일 수 있습니다.</p>
+
+
+
+
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+<div class='lab-content__renderable-instructions'>
+
+</div>
+</div>
+</ql-drawer-content>
+<ql-drawer end id='lab-outline-drawer' open slot='drawer' width='240'>
+<div aria-label='실습 목차' class='outline-container' id='js-outline-container' role='navigation'>
+<div class='ql-label-small'>실습 안내 및 작업</div>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">개요</a></li><li><a href="#step2">Vertex AI 소개</a></li><li><a href="#step3">설정 및 요건</a></li><li><a href="#step4">작업 1. Vertex AI Workbench 인스턴스 실행</a></li><li><a href="#step5">작업 2. 학습 애플리케이션 코드 컨테이너화</a></li><li><a href="#step6">작업 3. Vertex AI에서 하이퍼파라미터 조정 작업 실행</a></li><li><a href="#step7">작업 4. 삭제</a></li><li><a href="#step8">수고하셨습니다</a></li><li><a href="#step9">실습 종료</a></li>
+</ul>
+</div>
+</ql-drawer>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+
+
+
+</div>
+<div class='course-navigation-buttons'>
+<ql-button aria-label='이전' class='hide-mobile prev-button' href='/course_sessions/4180118/video/495466?locale=ko' icon='navigate_before'>이전</ql-button>
+<div class='next-navigation-buttons'>
+
+<ql-button class='next-button' href='/course_sessions/4180118/quizzes/495468?locale=ko' icon='navigate_next' trailingIcon>다음</ql-button>
+</div>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+
+</main>
+
+</ql-drawer-content>
+<footer slot='drawer-content'>
+<nav ariaLabel='Footer navigation' class='application-footer relaunch-extra'>
+
+<div class='footer-container'>
+<div class='footer-logo'>
+<a class="custom-logo" aria-label="Google Skills" href="/?locale=ko"><div class="custom-logo"><img alt="Google Skills" height="24" aria-label="Google Skills" src="https://cdn.qwiklabs.com/lqJbxogu4tSLez1OvjDcIO8rwow6cPLwvrfIdmQLf6U%3D" /></div></a>
+</div>
+<div class='footer-row'>
+<a href="/?locale=ko">대시보드</a>
+<a href="/catalog?locale=ko">카탈로그</a>
+<a href="/paths?locale=ko">학습 과정</a>
+<a href="/subscriptions?locale=ko">구독</a>
+<a href="/profile/stay_on_track?locale=ko">활동</a>
+<a href="/profile/badges?locale=ko">수료증</a>
+<a href="/my_account/profile?locale=ko">설정</a>
+<a rel="nofollow" data-method="delete" href="/users/sign_out?locale=ko">로그아웃</a>
+</div>
+<div class='footer-row'>
+<a class="g-cloud-youtube" target="_blank" rel="noopener" href="https://www.youtube.com/@googlecloud"><ql-icon icon='video_youtube'></ql-icon>
+YouTube
+</a><a rel="noopener" onclick="hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:2331402},&quot;context&quot;:&quot;lab&quot;}); return false;" href="/help?locale=ko">고객센터</a>
+<a href="/terms_of_service?locale=ko">약관</a>
+<a target="_blank" href="/privacy_policy?locale=ko">개인정보 보호</a>
+<a aria-hidden='true' class='glue-cookie-notification-bar-control'>
+쿠키 관리
+</a>
+</div>
+</div>
+
+</nav>
+</footer>
+</ql-drawer-container>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2A' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+
+
+<ql-dialog carousel id='private-mode-modal' noDefaultDismiss showPaginationProgress>
+<div class='page' slot='page'>
+<div class='page-content'>
+<img src="https://cdn.qwiklabs.com/assets/labs/start_lab-f45aca49782d4033c3ff688160387ac98c66941d.png" />
+<div class='page-text'>
+<h1 class='ql-headline-small'>
+시작하기 전에
+</h1>
+<div class='ql-body-large'>
+<ol>
+  <li>실습에서는 정해진 기간 동안 Google Cloud 프로젝트와 리소스를 만듭니다.</li>
+  <li>실습에는 시간 제한이 있으며 일시중지 기능이 없습니다. 실습을 종료하면 처음부터 다시 시작해야 합니다.</li>
+  <li>화면 왼쪽 상단에서 <strong>실습 시작</strong>을 클릭하여 시작합니다.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class='page' slot='page'>
+<div class='page-content'>
+<img src="https://cdn.qwiklabs.com/assets/labs/open_incognito_window-3ab2004605e88542dd7732361c3fc0e010c7fb6e.png" />
+<div class='page-text'>
+<h1 class='ql-headline-small'>
+시크릿 브라우징 사용
+</h1>
+<div class='ql-body-large'>
+<ol>
+  <li>실습에 입력한 <strong>사용자 이름</strong>과 <strong>비밀번호</strong>를 복사합니다.</li>
+  <li>비공개 모드에서 <strong>콘솔 열기</strong>를 클릭합니다.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class='page' slot='page'>
+<div class='page-content'>
+<img src="https://cdn.qwiklabs.com/assets/labs/google_sign_in-f9eb84339d08f7db8c5fdfa7ce7726d3531dae80.png" />
+<div class='page-text'>
+<h1 class='ql-headline-small'>
+콘솔에 로그인
+</h1>
+<div class='ql-body-large'>
+<ol>
+  실습 사용자 인증 정보를 사용하여 <li><strong>로그인</strong>합니다. 다른 사용자 인증 정보를 사용하면 오류가 발생하거나 요금이 부과될 수 있습니다.</li>
+  <li>약관에 <strong>동의</strong>하고 리소스 복구 페이지를 건너뜁니다.</li>
+  <li>실습을 완료했거나 다시 시작하려고 하는 경우가 아니면 <strong>실습 종료</strong>를 클릭하지 마세요. 이 버튼을 클릭하면 작업 내용이 지워지고 프로젝트가 삭제됩니다.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</ql-dialog>
+
+<ql-dialog headline='점수 세부정보' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<ql-dialog id='lab-notification-dialog' noDefaultAction noDefaultDismiss>
+<img src="https://cdn.qwiklabs.com/assets/lab_enablement_notification/disable_lab-47cff1f6bc3610f58767251ff93c2f99cf4f9040.png" />
+<p class='title ql-headline-4'>현재 이 콘텐츠를 이용할 수 없습니다</p>
+<p class='description ql-body-1'>이용할 수 있게 되면 이메일로 알려드리겠습니다.</p>
+<ql-button href='/focuses/168811157/set_up_lab_forward_url?course_template=9&amp;locale=ko&amp;parent=course_session' id='lab-notification-close-button' label='아니요' slot='action' text></ql-button>
+<ql-button fill id='lab-notification-submit' label='예, 알림을 받겠습니다' slot='action' text></ql-button>
+</ql-dialog>
+<ql-dialog id='lab-notification-subscribed-dialog' noDefaultAction noDefaultDismiss>
+<img src="https://cdn.qwiklabs.com/assets/lab_enablement_notification/notifcation_subscribed-2b4f9e51439e1a107488ab58a6e13c3c62ef8855.png" />
+<p class='title ql-headline-4'>감사합니다</p>
+<p class='description ql-body-1'>이용할 수 있게 되면 이메일로 알려드리겠습니다.</p>
+<ql-button href='/focuses/168811157/set_up_lab_forward_url?course_template=9&amp;locale=ko&amp;parent=course_session' id='lab-notification-subscribed-close-button' label='화면으로 돌아가기' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog forInnovator id='lab-quota-modal' noDefaultAction>
+<img id="quota-image" class="lab-image-small" src="https://cdn.qwiklabs.com/assets/quota_management/quota_empty-2ba3ec879dea3091828ec9cfa060947292e2c554.png" />
+<p class='title quota-header'>
+<p class='description quota-body'></p>
+<ql-button id='close_button' label='확인' primary slot='action' text></ql-button>
+</p>
+</ql-dialog>
+<ql-dialog forInnovator id='lab-quota-one-lab-modal' noDefaultAction>
+<img id="quota-image" class="lab-image-medium" src="https://cdn.qwiklabs.com/assets/quota_management/one_lab_quota-77010e9a83e0a6c7543477868b8b808d70222adb.png" />
+<p class='title quota-header'>한 번에 실습 1개만 가능</p>
+<p class='description quota-body'>모든 기존 실습을 종료하고 이 실습을 시작할지 확인하세요.</p>
+<ql-button id='cancel_button' label='취소' onclick='ql.quotaManagementAlert.closeOneLabModal();' primary slot='action' text></ql-button>
+<ql-button id='confirm_button' label='확인' primary slot='action' text></ql-button>
+<script>
+  var quotaEmptyPath = "https://cdn.qwiklabs.com/assets/quota_management/quota_empty-2ba3ec879dea3091828ec9cfa060947292e2c554.png";
+  var quotaWarningOneLeftPath = "https://cdn.qwiklabs.com/assets/quota_management/quota_1_warning-d4669345281d01d38c7a13eed888f72469860ed8.png";
+  var quotaWarningFiveLeftPath = "https://cdn.qwiklabs.com/assets/quota_management/quota_5_warning-4f647be02bcbb65e2bbf18ea19d5493032524116.png";
+</script>
+</ql-dialog>
+
+<ql-dialog id='incorrect-start-lab-modal' noDefaultAction noDefaultDismiss>
+<div class='body'>
+<img src="https://cdn.qwiklabs.com/assets/labs/open_incognito_window-3ab2004605e88542dd7732361c3fc0e010c7fb6e.png" />
+<div class='page-text'>
+<h1 class='ql-headline-small'>
+시크릿 브라우징을 사용하여 실습 실행하기
+</h1>
+<div class='ql-body-large'>
+이 실습을 실행하려면 시크릿 모드 또는 시크릿 브라우저 창을 사용하세요. 개인 계정과 학생 계정 간의 충돌로 개인 계정에 추가 요금이 발생하는 일을 방지해 줍니다.
+</div>
+</div>
+</div>
+<div class='actions'>
+<ql-button id='incorrect-start-lab-modal-cancel' label='취소' onclick='document.getElementById(&#39;incorrect-start-lab-modal&#39;).close()' slot='action'></ql-button>
+</div>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+이 실습에서는 Vertex AI를 사용하여 TensorFlow 모델을 위한 하이퍼파라미터 조정 작업을 실행합니다.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+소요 시간:
+</strong>
+0분 설정
+&middot;
+150분 액세스
+&middot;
+150분 완료
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS 리전:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>수준: </strong>advanced</span>
+</p>
+<p class='small-label'>
+<strong>
+퍼머링크:
+</strong>
+<a href="https://www.skills.google/catalog_lab/4414">https://www.skills.google/catalog_lab/4414</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='이 실습에 얼마나 만족하시나요?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews?locale=ko" accept-charset="UTF-8" data-remote="true" method="post"><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="2331402" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="4414" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">추가 의견</label><div class="controls"><md-outlined-text-field class="text optional" label="추가 의견" name="lab_review[comment]" id="lab_review_comment" type="textarea" value=""></md-outlined-text-field></div></div>
+</div>
+</form><ql-button disabled id='submit' label='제출' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='계속하시겠어요? 실습을 다시 시작하지 못할 수 있으며 이러한 경우 처음부터 시작해야 합니다.' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='실습 종료' slot='action' text></ql-button>
+</ql-dialog>
+<ql-dialog dismissalLabel='취소' headline='이 과정의 최신 버전을 사용할 수 있습니다. 업그레이드를 선택해도 진행 상황은 그대로 유지됩니다. 그러나 새 버전에서 학습 활동을 추가하거나 삭제한 경우 완료율이 변경될 수 있습니다. 업그레이드하기 전에 미리보기 버튼을 클릭하여 과정 변경사항을 확인하세요.' icon='error' id='course-session-upgrade-modal'>
+<ql-button href='/course_templates/9/preview?locale=ko' label='미리보기' slot='action'>
+미리보기
+</ql-button>
+</ql-dialog>
+
+
+
+<script>
+  document.addEventListener("turbo:load", function () {
+    ql.initMaterialInputs();
+    initChosen();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    Turbo.session.drive = false;
+    ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"별점 1/5","star_amount_2":"별점 2/5","star_amount_3":"별점 3/5","star_amount_4":"별점 4/5","star_amount_5":"별점 5/5"} )
+  ql.labAssessment.init({ openPanelAutomatically: false });
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"계속하시겠어요? 실습을 다시 시작하지 못할 수 있으며 이러한 경우 처음부터 시작해야 합니다.","in_progress":"*진행 중*","ending":"*종료 중*","starting":"*시작 중입니다. 기다려 주세요.*","end_concurrent_labs":"죄송합니다. 실습은 한 번에 하나씩만 진행할 수 있습니다. 이 실습을 시작하기 위해 기존의 모든 실습을 종료해도 되는지 확인해 주세요.","copied":"복사됨","no_resource":"리소스를 가져오는 중에 오류가 발생했습니다.","no_support":"지원되지 않음","mac_press":"복사하려면 ⌘+C 키를 누르세요.","thanks_review":"이 실습을 검토해 주셔서 감사합니다.","windows_press":"복사하려면 Ctrl+C 키를 누르세요.","days":"일"} );
+  ql.labRun.init();
+  ql.course_resize_layout.init("", "과정", "기업의 머신러닝", "과정", "Vertex Vizier 하이퍼파라미터 조정");
+  ql.course_navigation.init("4180042");
+  ql.searchHeader.init({isRelaunch: true});
+  (new ql.searchAutocomplete()).init({forHeaderNew: true, topSuggestions: [{"label":"기계 학습"},{"label":"생성 ai"},{"label":"데이터 분석가"},{"label":"클라우드 아키텍처"},{"label":"보안 기초"}]});
+  ql.chat.init();
+  ql.chat.init();
+  ql.messages.init();
+  ql.jumpContent.init();
+  
+  }, {once: true});
+</script>
+<script>
+  document.addEventListener("turbo:load", function () {
+    ql.celebrations.init({"course_complete":"과정 완료","document_complete":"문서 완료","experience_label":"참여 점수","lab_complete":"실습 완료","learning_plan_complete":"학습 과정 완료","lesson_complete":"강의 완료","quiz_complete":"퀴즈 완료","video_complete":"동영상 완료"});
+    ql.achievements.init();
+  }, {once: true});
+</script>
+
+</body>
+</html>
+
+
+
