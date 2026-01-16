@@ -1,0 +1,36 @@
+[gcloud 명령 목록]
+gcloud config set compute/region europe-west1
+gcloud config get-value compute/region
+gcloud config set compute/zone europe-west1-b
+gcloud config get-value compute/zone
+
+- 환경 변수 설정
+export PROJECT_ID=$(gcloud config get-value project)
+export ZONE=$(gcloud config get-value compute/zone)
+export REGION=$(gcloud config get-value compute/region)
+echo $REGION 
+
+- gcloud 도구로 가상 머신 만들기
+gcloud compute instances create gcelab2 --machine-type e2-medium --zone $ZONE
+
+- 버킷 생성
+gcloud storage buckets create gs://mybucket-105186977018
+
+- 버킷에 파일 업로드
+gcloud storage cp ada.jpg gs://mybucket-105186977018
+
+- 버킷의 파일 다운로드
+gcloud storage cp -r gs://mybucket-105186977018/ada.jpg .
+
+gcloud storage cp gs://mybucket-105186977018/ada.jpg gs://mybucket-105186977018/image-folder/
+
+- 버킷에 공개 액세스 설정
+gsutil acl ch -u AllUsers:R gs://mybucket-105186977018/ada.jpg
+
+gsutil acl ch -d AllUsers gs://mybucket-105186977018/ada.jpg
+
+- 버킷의 객체(파일/폴더) 삭제
+gcloud storage rm gs://mybucket-105186977018/ada.jpg
+
+
+
